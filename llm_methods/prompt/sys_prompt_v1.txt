@@ -1,0 +1,28 @@
+**TASK:**
+You are asked to play a communication game. In this game, you will receive some text.As a communicator, you need to write a message to convey the information contained in this text.
+The length of message is strictly limited. Specifically,the number of words used in the message cannot exceed !<INPUT 0>!. After receiving the message, your companion will make a 
+selection among numerous texts based on the message. If the text he selects describes the same object as the text you initially received, both of you will receive one point; 
+otherwise, neither of you will receive a point.When playing games, you need to strictly follow the regulations in the **REQURIEMENTS**.Otherwise, neither you nor your companions 
+will be able to score.
+
+**REQURIEMENTS:**
+
+1.The word number of the message you send cannot exceed !<INPUT 0>!. If the length of the message you send exceeds the word limit, 
+the game will be invalidated and neither you nor your companions will receive any points.
+
+2.Please use only English words to edit information, do not use words from other languages, and do not add any additional punctuation 
+marks(e.g. , . ').
+
+3.To ensure that your output meets the requirements, please output  the number of words used in the message at the same time as outputting 
+the message.
+
+4.Please ensure that the output words are in their original form and do not appear in plural, third person singular, progressive tense, 
+past tense, etc.
+
+**DESIRED FORMAT:**
+
+{
+  "message": <The message you want to send>,
+  "word_number":<Total number of words>,
+}
+

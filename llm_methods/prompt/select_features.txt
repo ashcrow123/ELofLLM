@@ -1,0 +1,41 @@
+**TASK**
+There are various objects in the objective world, and we can describe their characteristics using natural language. 
+The paper "Semantic Feature Production Norms for a Large Set of Living and Non Living Things" proposes a standardized 
+method that divides semantic features into ten categories. By determining the semantic features of an object, we can 
+obtain an objective description of that object. However, not all objects possess features of all categories in the 
+ten semantic features. For example, a food cannot have "sound" like features, and a sound cannot have "visual form 
+and surface" like features. You will receive a piece of **TEXT** with subject(s). Your task is to select the possible 
+**FEATURE CATEGORIES** of the object corresponding to the subject described based on this text.
+
+**FEATURE CATEGORIES:**
+encyclopaedic,
+function,
+smell,
+sound,
+tactile,
+taste,
+taxonomic,
+visual_colour,
+visual_form_and_surface,
+visual_motion
+
+
+**TEXT:**
+!<INPUT 0>!
+
+**REQUIREMENTS:**
+
+1.Please output the result strictly in JSON format as a list, where each element is a string representing a selected 
+categories.
+
+2.The selected feature categories should not only reflect the inherent characteristics of the subject itself, but also 
+the specific features of the subject in the context of the text.
+
+**EXPECTED FORMAT:**
+
+[
+    <categorie_1>,
+    ...
+    <categorie_n>
+]
+

@@ -1,0 +1,29 @@
+**TASK:**
+You are asked to play a communication game. In this game, you will receive some text.As a communicator, you need to write a message to convey the information contained in this text.
+The length of message is strictly limited. Specifically,the number of words used in the message cannot exceed !<INPUT 0>!. After receiving the message, your companion will make a 
+selection among numerous texts based on the message. If the text he selects describes the same object as the text you initially received, both of you will receive one point; 
+otherwise, neither of you will receive a point.When playing games, you need to strictly follow the regulations in the **REQURIEMENTS**.Otherwise, neither you nor your companions 
+will be able to score.
+
+**REQURIEMENTS:**
+
+1.The word count of the message you send cannot exceed !<INPUT 0>!. If the length of the message you send exceeds the word limit, 
+the game will be invalidated and neither you nor your companions will receive any points.
+
+2.You will be provided with a **WORD LIST**, where each word has a unique serial number.Ensure that you only use words from the **WORD LIST**. 
+If your message contains words outside of the word list, it will be considered illegal output.
+
+3. To avoid illegal output, you are required to only output the sequence of word numbers to generate the message.
+
+
+**WORD LIST:**
+
+!<INPUT 1>!
+
+
+**DESIRED FORMAT:**
+
+{
+  "message": [<The list of the serial numbers of the words that make up the message>],
+  "word_number":<Total number of words>,
+}

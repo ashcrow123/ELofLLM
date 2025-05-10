@@ -1,0 +1,36 @@
+**TASK:**
+You are a language learner. You are studying a special artificial language that has !<INPUT 0>! letters. These letters 
+are each a combination of one consonant letter and one vowel letter from the English alphabet. You can see them in the 
+**LETTERS** section. This artificial language shares properties similar to natural languages, such as Morphological 
+Properties, Syntactic Properties, Semantic Properties, Productivity and Creativity, and Ambiguity. Your task is to 
+select up to !<INPUT 1>! words from your **LEARNED VOCABULARY** that share the same morphological form (i.e., may be 
+semantically related) as the **GIVEN WORD**.
+
+**LETTERS:**
+!<INPUT 2>!
+
+**LEARNED VOCABULARY:**
+!<INPUT 3>!
+
+**GIVEN WORD:**
+!<INPUT 4>!
+
+**REQUIREMENTS:**
+
+1. You may select up to ten words. If your learned vocabulary contains fewer than !<INPUT 1>! words, or if you believe 
+there are fewer than ten relevant words in it, just select all the words you consider to meet the criteria. There is no 
+need to force a total of !<INPUT 1>! words.
+
+2. Please output the result strictly in JSON format as a list, where each element is a string representing a selected 
+word.
+
+3. This artificial language follows characteristics of natural languages. Therefore, the information in the 
+**LEARNED VOCABULARY** may be crucial for your selecting. Please reference it carefully and thoughtfully.
+
+**EXPECTED FORMAT:**
+
+[
+    <word_1 you selected>,
+    ...
+    <word n you selected>
+]

@@ -1,0 +1,34 @@
+**TASK:**
+You are a language learner. You are studying a special artificial language that has !<INPUT 0>! letters. These letters 
+are each a combination of one consonant letter and one vowel letter from the English alphabet. You can see them in the 
+**LETTERS** section. This artificial language shares properties similar to natural languages, such as Morphological 
+Properties, Syntactic Properties, Semantic Properties, Productivity and Creativity, and Ambiguity. Your task is to, upon 
+receiving a **WORD** in the current artificial language, select the most likely **SEMANTIC FEATURES** that reflect the meaning of 
+the **WORD**, based on **LEARNED VOCABULARY**.
+
+**LETTERS:**
+!<INPUT 1>!
+
+**LEARNED VOCABULARY:**
+!<INPUT 2>!
+
+**WORD:**
+!<INPUT 3>!
+
+**SEMANTIC FEATURES**
+!<INPUT 4>!
+
+**REQUIREMENTS:**
+
+1. **SEMANTIC FEATURES** will be presented in a JSON-formatted dictionary, where the keys are options (such as A, B, C), and the 
+corresponding values are the semantic features. If you believe a certain semantic feature best reflects the meaning of the given 
+word, return the key corresponding to that semantic feature.
+
+2. Please output only a single string that contains the key of the selected semantic feature—do not include any additional characters 
+or information.
+
+3. This artificial language follows characteristics of natural languages. Therefore, the information in the 
+**LEARNED VOCABULARY** may be crucial for your selecting. Please reference it carefully and thoughtfully.
+
+**EXPECTED FORMAT:**
+<Directly return options, such as 'A', 'B', 'C', etc>
