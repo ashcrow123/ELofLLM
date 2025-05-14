@@ -1,6 +1,6 @@
 from communicator.communicator import communicator
 from llm_methods.gpt_structure import text_embedding_request
-from data_loader.BRM_loader import BRM_loader
+from data_loader.BRM_loader import BRM_loader,load_object_feature_pairs
 from data_loader.coco_loader import coco_loader
 import random
 import os
@@ -38,26 +38,29 @@ class game:
         for i in range(player_num):
             self.players[str(i)]=communicator(self.letter_list,num=str(i))
         self.round=0
-        self.obj_loader=coco_loader()   
-        self.obj_loader.sample(0.1)
+        # self.obj_loader=coco_loader()   
+        # self.obj_loader.sample(0.1)
+        self.obj_loader=load_object_feature_pairs()
         self.save_interval=save_interval
     def communicate(
                 self,
                 speaker_num:str,
                 listener_num:str,
-                obj_list:list):
+                obj_dict:dict):
         speaker=self.players[speaker_num]
         listener=self.players[listener_num]
         round=0
         success=False
         word_list=[]
         choices_list=[]
+        obj_list=list(obj_dict.keys())
         corr_obj=random.choice(obj_list)
         corr_obj_embedding=text_embedding_request(corr_obj)
-        obj_features_dict={obj:self.features_loader.generate_features(obj) for obj in obj_list}
+        # obj_features_dict={obj:self.features_loader.generate_features(obj) for obj in obj_list}
+        obj_features_dict=obj_dict
         select_features_dict=dict()
         choices_dict=dict()
-        choices="ABCDEFG"
+        choices="ABC"
         for i in range(len(obj_list)):
             choices_dict[choices[i]]=obj_list[i]
             select_features_dict[choices[i]]=obj_features_dict[obj_list[i]]
@@ -127,18 +130,18 @@ class game:
                         speaker_short_memory.append(short_memory)
                         word_list.append(word)
             else:
-                # speaker.word_database.add_word(
-                #             text_embedding=corr_obj_embedding,
-                #             word=word,
-                #             obj=corr_obj,
-                #             **obj_features_dict[corr_obj],
-                #         )
-                # listener.word_database.add_word(
-                #     text_embedding=corr_obj_embedding,
-                #     word=word,
-                #     obj=corr_obj,
-                #     **obj_features_dict[corr_obj],
-                # )
+                speaker.word_database.add_word(
+                            text_embedding=corr_obj_embedding,
+                            word=word,
+                            obj=corr_obj,
+                            **obj_features_dict[corr_obj],
+                        )
+                listener.word_database.add_word(
+                    text_embedding=corr_obj_embedding,
+                    word=word,
+                    obj=corr_obj,
+                    **obj_features_dict[corr_obj],
+                )
                 break
         return {
             "speaker_num":speaker_num,
@@ -164,11 +167,13 @@ class game:
                 pairs.append((player_num[i],player_num[i+1]))
             print(pairs)
             for pair in pairs:
-                obj_list=self.obj_loader.get_random_caption()
+                # obj_list=self.obj_loader.get_random_caption()
+                random_keys=random.choices(list(self.obj_loader.keys()),k=3)
+                obj_dict={obj:self.obj_loader[obj] for obj in random_keys}
                 result=self.communicate(
                     speaker_num=pair[0],
                     listener_num=pair[1],
-                    obj_list=obj_list,
+                    obj_dict=obj_dict,
                 )
                 results.append(result)
             if save_flag%self.save_interval==0:
@@ -213,14 +218,14 @@ if __name__=="__main__":
     letter_list=select_letters()
     print(letter_list)
     g1=game(
-        name="4test",
-        player_num=10,
+        name="6test",
+        player_num=20,
         letter_list=letter_list,
         comm_num=5,
-        save_interval=3
+        save_interval=1
     )
-    g1.load(108)
-    g1.run(12)
+    g1.load(44)
+    g1.run(1)
     #TODO
     '''
     1.为近义词搜索设置阈值√

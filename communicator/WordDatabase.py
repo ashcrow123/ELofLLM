@@ -93,16 +93,16 @@ class Word:
     def __init__(self,
                  obj:str, 
                  word: str,
-                 encyclopaedic=None,
-                 function=None,
-                 smell=None,
-                 sound=None,
-                 tactile=None,
-                 taste=None,
-                 taxonomic=None,
-                 visual_colour=None,
-                 visual_form_and_surface=None,
-                 visual_motion=None):
+                 encyclopaedic=[],
+                 function=[],
+                 smell=[],
+                 sound=[],
+                 tactile=[],
+                 taste=[],
+                 taxonomic=[],
+                 visual_colour=[],
+                 visual_form_and_surface=[],
+                 visual_motion=[]):
         
         self.obj = obj
         self.word = word
@@ -195,9 +195,19 @@ class WordDatabase:
         
         length=str(len(self.word_dict))
         self.word_dict[str(length)]=new_word
-        self.word_to_key_dict[word]=str(length)
+        try:
+            self.word_to_key_dict[word].append(length)
+        except:
+            self.word_to_key_dict[word]=[length]
         for tp in self.search_dict.keys():
-            self.search_dict[tp][new_word.todict()[tp]].append(str(length)) if new_word.todict()[tp] else None
+            word_features=new_word.todict()[tp]
+            if not word_features:
+                continue
+            for feature in word_features:
+                try:
+                    self.search_dict[tp][feature].append(length) 
+                except:
+                    self.search_dict[tp][feature]=[length]
         self.embeddings_list.append(text_embedding)
         return
     
@@ -254,8 +264,24 @@ class WordDatabase:
             "visual_form_and_surface": visual_form_and_surface,
             "visual_motion": visual_motion,
         }
-        lists=[self.search_dict[tp][feature] for tp, feature in search_dict.items() if feature!=None]
+        lists=[]
+        for tp,features in search_dict.items():
+            if features==[]:
+                continue
+            for feature in features:
+                try:
+                    lists.append(self.search_dict[tp][feature]) if self.search_dict[tp][feature]!=[] else None
+                except:
+                    pass
         intersection=get_Intersection(lists)
+        for elem in intersection:
+            elem_dict=self.word_dict[elem].todict()
+            for key in list(search_dict.keys()):
+                if elem_dict[key]==search_dict[key]:
+                    pass
+                else:
+                    intersection.remove(elem)
+                    break
         if len(intersection)==0:
             return []
         else:
@@ -268,7 +294,7 @@ class WordDatabase:
             word=self.word_dict[str(id)]
             syn_list.append(word)
         return syn_list
-            
+    #TODO 修改使得匹配新的数据结构        
     def search_resembling_word(self,target_word):
         try:
             target_blocks = split_cv_blocks(target_word)

@@ -30,5 +30,8 @@ or information.
 3. This artificial language follows characteristics of natural languages. Therefore, the information in the 
 **LEARNED VOCABULARY** may be crucial for your selecting. Please reference it carefully and thoughtfully.
 
+4.We only offer three options: 'A', 'B', and 'C', so please only choose from these three options and output the one you have selected. 
+Do not output any additional content or non-existent options such as' D ',' E ', etc.
+
 **EXPECTED FORMAT:**
 <Directly return options, such as 'A', 'B', 'C', etc>

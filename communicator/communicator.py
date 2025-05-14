@@ -46,8 +46,10 @@ class communicator:
             )
         else:
             resembling_list=[]
+        word_num_list=[]
         if resembling_list:
-            word_num_list=[self.word_database.word_to_key_dict[word] for word in resembling_list]
+            for word in resembling_list:
+                word_num_list+=self.word_database.word_to_key_dict[word]
             vocab_list=[self.word_database.word_dict[num].todict_wo_object() for num in word_num_list]
             choice=run_gpt_prompt_listener_decide(
                 len(self.letter_list),

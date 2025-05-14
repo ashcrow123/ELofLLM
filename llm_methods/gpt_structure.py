@@ -40,7 +40,7 @@ def GPT_4o_request(prompt, gpt_parameter):
         else:
             msg = [{"role": "user", "content": prompt}]
         completion = client.chat.completions.create(
-            model="gpt-4o",
+            model=gpt_parameter["model"],
             messages=msg,
             max_tokens=gpt_parameter["max_tokens"],
             top_p=gpt_parameter["top_p"],
@@ -198,14 +198,14 @@ def format_set_as_table(data_set):
 def print_run_prompts(
     prompt_template=None,
     player_num=None,
-    prompt_input=None,
+    prompt=None,
     output=None,
 ):
     print(f"=== {prompt_template}")
     print("~~~ persona    ---------------------------------------------------")
     print(player_num, "\n")
-    print("~~~ prompt_input    ----------------------------------------------")
-    print(prompt_input, "\n")
+    print("~~~ prompt     ---------------------------------------------------")
+    print(prompt, "\n")
     print("~~~ output    ----------------------------------------------------")
     print(output, "\n")
     print("=== END ==========================================================")

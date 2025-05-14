@@ -38,5 +38,8 @@ be between 3 and 12.
 5.The **FAILED COMMUNICATION RECORDS** reflect your shortcomings in artificial language learning, which have caused
  you and your peers to be unable to align. Based on this information, carefully consider and regenerate the word.
 
+6.To ensure the standardization of the output, use the symbol '-' to space the letters in the word.
+For example, <letter_1>-<letter-2>-<letter-3>-<letter-4>
+
 **EXPECTED FORMAT:**
-<Output only the final word, without any additional information or characters.>
+<Output only the final word, without any additional information or characters,ensuring that letters are separated by a '-'>

@@ -221,6 +221,7 @@ def run_gpt_prompt_speaker_generate(letters_count,
                         letters_list=letters_list,
                         prompt=None,):
         try:
+            gpt_response="".join(gpt_response.split("-"))
             blocks=split_cv_blocks(gpt_response)
             for letter in blocks:
                 if letter not in letters_list:
@@ -240,6 +241,7 @@ def run_gpt_prompt_speaker_generate(letters_count,
     fail_safe=get_fail_safe()
     
     gpt_param = {
+        "model":"gpt-4.1",
         "max_tokens": 4096,
         "top_p": 1,
         "frequency_penalty": 0,
@@ -255,7 +257,7 @@ def run_gpt_prompt_speaker_generate(letters_count,
     output = safe_generate_response(
         prompt, 
         gpt_param, 
-        12, 
+        10, 
         fail_safe, 
         __func_validate, 
         __func_clean_up
@@ -264,7 +266,7 @@ def run_gpt_prompt_speaker_generate(letters_count,
         print_run_prompts(
             prompt_template=prompt_template,
             player_num=player_num,
-            prompt_input=input_list,
+            prompt=prompt,
             output=output,
         )
     
@@ -330,6 +332,7 @@ def run_gpt_prompt_select_resembling_words(letters_count,
     fail_safe=get_fail_safe()
     
     gpt_param = {
+        "model":"gpt-4.1",
         "max_tokens": 4096,
         "top_p": 1,
         "frequency_penalty": 0,
@@ -345,7 +348,7 @@ def run_gpt_prompt_select_resembling_words(letters_count,
     output= safe_generate_response(
         prompt, 
         gpt_param, 
-        12, 
+        10, 
         fail_safe, 
         __func_validate, 
         __func_clean_up
@@ -355,7 +358,7 @@ def run_gpt_prompt_select_resembling_words(letters_count,
         print_run_prompts(
             prompt_template=prompt_template,
             player_num=player_num,
-            prompt_input=input_list,
+            prompt=prompt,
             output=output,
         )
     
@@ -402,7 +405,7 @@ def run_gpt_prompt_listener_decide(letters_count,
     def __func_clean_up(gpt_response,
                         prompt=None,):
         try:
-            if gpt_response in ["A","B","C","D","E","F","G"]:
+            if gpt_response in ["A","B","C",]:
                 return gpt_response  
             else:
                 return False       
@@ -416,6 +419,7 @@ def run_gpt_prompt_listener_decide(letters_count,
     fail_safe=get_fail_safe()
     
     gpt_param = {
+        "model":"gpt-4.1",
         "max_tokens": 4096,
         "top_p": 1,
         "frequency_penalty": 0,
@@ -431,7 +435,7 @@ def run_gpt_prompt_listener_decide(letters_count,
     output= safe_generate_response(
         prompt, 
         gpt_param, 
-        12, 
+        5, 
         fail_safe, 
         __func_validate, 
         __func_clean_up
@@ -441,7 +445,7 @@ def run_gpt_prompt_listener_decide(letters_count,
         print_run_prompts(
             prompt_template=prompt_template,
             player_num=player_num,
-            prompt_input=input_list,
+            prompt=prompt,
             output=output,
         )
     
@@ -501,6 +505,7 @@ def run_gpt_prompt_select_feature(word,
     fail_safe=get_fail_safe()
     
     gpt_param = {
+        "model":"gpt-4o-mini",
         "max_tokens": 4096,
         "top_p": 1,
         "frequency_penalty": 0,
@@ -512,7 +517,7 @@ def run_gpt_prompt_select_feature(word,
     output= safe_generate_response(
         prompt, 
         gpt_param, 
-        12, 
+        5, 
         fail_safe, 
         __func_validate, 
         __func_clean_up
@@ -521,7 +526,7 @@ def run_gpt_prompt_select_feature(word,
     if verbose:
         print_run_prompts(
             prompt_template=prompt_template,
-            prompt_input=input_list,
+            prompt=prompt,
             output=output,
         )
     

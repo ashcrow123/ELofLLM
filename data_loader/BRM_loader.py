@@ -103,7 +103,32 @@ class BRM_loader:
             else:
                 features[tp]=None
         return features
-    
+def load_object_feature_pairs():
+    pairs=dict()
+    path="./data/McRae-BRM-InPress/CONCS_FEATS_concstats_brm.xlsx"
+    df=pd.read_excel(path)
+    df=df.dropna()
+    df['Feature'] = df['Feature'].str.replace('_', ' ')
+    df['BR_Label'] = df['BR_Label'].str.replace('-', '_')
+    df['Feature'] = df['Feature'].str.replace(r'^beh - ', 'living behavior: ', regex=True)
+    df['Feature'] = df['Feature'].str.replace(r'^inbeh - ', 'non-living behavior: ', regex=True)
+    groups=df.groupby("Concept")
+    for concept,group in groups:
+        pairs[concept]={
+            'encyclopaedic':[],
+            'function':[],
+            'smell':[],
+            'sound':[],
+            'tactile':[],
+            'taste':[],
+            'taxonomic':[],
+            'visual_colour':[],
+            'visual_form_and_surface':[],
+            'visual_motion':[]
+            }
+        for index,row in group.iterrows():
+            pairs[concept][row['BR_Label']].append(row["Feature"])
+    return pairs   
 if __name__ == "__main__":
     pass
     
