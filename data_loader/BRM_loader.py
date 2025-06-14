@@ -4,6 +4,7 @@ import numpy as np
 from llm_methods.gpt_structure import text_embedding_request
 from llm_methods.run_gpt_prompt import run_gpt_prompt_select_feature
 import json
+import random
 
 def find_most_similar_word(target_word, candidate_words,k=1):
         # 确保输入是二维数组（便于批量操作）
@@ -103,7 +104,7 @@ class BRM_loader:
             else:
                 features[tp]=None
         return features
-def load_object_feature_pairs():
+def load_object_feature_pairs(seed=None,count=None):
     pairs=dict()
     path="./data/McRae-BRM-InPress/CONCS_FEATS_concstats_brm.xlsx"
     df=pd.read_excel(path)
@@ -128,7 +129,16 @@ def load_object_feature_pairs():
             }
         for index,row in group.iterrows():
             pairs[concept][row['BR_Label']].append(row["Feature"])
+    if seed and count:
+        random_pairs=dict()
+        random.seed(seed)
+        keys=random.sample(list(pairs.keys()),k=count)
+        for key in keys:
+            random_pairs[key]=pairs[key]
+        pairs=random_pairs
+        random.seed(None)
     return pairs   
+
 if __name__ == "__main__":
     pass
     

@@ -28,7 +28,7 @@ value being your partner's incorrect understanding of the word.
 the **LETTERS** listed.
 
 2. You may reuse the same letter in the word, But the total number of letters used (including duplicates) must 
-be between 3 and 12.
+be between 2 and 6.
 
 3. This artificial language follows characteristics of natural languages. Therefore, the information in the 
 **LEARNED VOCABULARY** may be crucial to forming your new word. Please reference it carefully and thoughtfully.
@@ -36,10 +36,17 @@ be between 3 and 12.
 4.If the **FAILED COMMUNICATION RECORDS** is empty, it means that you and your partner are communicating for the first time.
 
 5.The **FAILED COMMUNICATION RECORDS** reflect your shortcomings in artificial language learning, which have caused
- you and your peers to be unable to align. Based on this information, carefully consider and regenerate the word.
+ you and your peers to be unable to align. Based on this information, carefully consider and regenerate a new word.
 
 6.To ensure the standardization of the output, use the symbol '-' to space the letters in the word.
 For example, <letter_1>-<letter-2>-<letter-3>-<letter-4>
 
+7.Before you output the word, do a brief analysis of the words you want to output to help you output more suitable word.
+
+8.Output in json format, like **EXPECTED FORMAT**.
+
 **EXPECTED FORMAT:**
-<Output only the final word, without any additional information or characters,ensuring that letters are separated by a '-'>
+{
+    "analysis": <do a brief analysis of the words you want to output according to **LEARNED VOCABULARY**,**OBJECT PROPERTIES** and **FAILED COMMUNICATION RECORDS**>,
+    "word": <Output only the final word, without any additional information or characters,ensuring that letters are separated by a '-'>
+}

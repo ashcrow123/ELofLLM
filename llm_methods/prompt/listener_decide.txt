@@ -20,7 +20,7 @@ the **WORD**, based on **LEARNED VOCABULARY**.
 
 **REQUIREMENTS:**
 
-1. **SEMANTIC FEATURES** will be presented in a JSON-formatted dictionary, where the keys are options (such as A, B, C), and the 
+1. **SEMANTIC FEATURES** will be presented in a JSON-formatted dictionary, where the keys are options (such as A, B, C, e.t.c), and the 
 corresponding values are the semantic features. If you believe a certain semantic feature best reflects the meaning of the given 
 word, return the key corresponding to that semantic feature.
 
@@ -30,8 +30,12 @@ or information.
 3. This artificial language follows characteristics of natural languages. Therefore, the information in the 
 **LEARNED VOCABULARY** may be crucial for your selecting. Please reference it carefully and thoughtfully.
 
-4.We only offer three options: 'A', 'B', and 'C', so please only choose from these three options and output the one you have selected. 
-Do not output any additional content or non-existent options such as' D ',' E ', etc.
+4.Before you output your options, do a brief analysis of the current multiple-choice question to help you output more suitable options.
+
+5.Output in json format, like **EXPECTED FORMAT**.
 
 **EXPECTED FORMAT:**
-<Directly return options, such as 'A', 'B', 'C', etc>
+{
+    "analysis": <do a brief analysis of the current multiple-choice question according to **LEARNED VOCABULARY**,**WORD**,**SEMANTIC FEATURES**>，
+    "option": <Directly return options from "A","B","C","D","E">
+}

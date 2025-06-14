@@ -3,3 +3,5 @@ output/
 test.py
 sim_storage
 statistic
+image/
+__pycache__

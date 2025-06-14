@@ -55,7 +55,7 @@ class coco_loader:
         image_info = self.coco.loadImgs(image_id)
         return image_info
     def get_random_caption(self,count=3):
-        ids_list=random.choices(self.image_ids,k=count)
+        ids_list=random.sample(self.image_ids,k=count)
         captions_list=[random.choice(self.get_captions(id))["caption"] for id in ids_list]
         return captions_list
         

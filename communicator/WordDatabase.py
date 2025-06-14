@@ -2,7 +2,8 @@ from data_loader.BRM_loader import BRM_loader
 import numpy as np
 import json
 import os
-
+import warnings
+import random
 def split_cv_blocks(word):
     """将单词分割成辅音+元音组合块"""
     blocks = []
@@ -37,6 +38,16 @@ def edit_distance_cv_blocks(blocks1, blocks2):
                 dp[i - 1][j - 1] + cost
             )
     return dp[m][n]
+
+def Jaccard_similarity(blocks_1, blocks_2, n):
+    def n_grams(blocks, n):
+        """生成n-gram"""
+        return set(tuple(blocks[i:i+n]) for i in range(len(blocks) - n + 1))
+    set1=n_grams(blocks_1, n)
+    set2=n_grams(blocks_2, n)
+    intersection = len(set1.intersection(set2))
+    union = len(set1.union(set2))
+    return intersection / union if union != 0 else 0.0
 
 def get_Intersection(lists):
     # 计算多个列表的交集
@@ -93,6 +104,8 @@ class Word:
     def __init__(self,
                  obj:str, 
                  word: str,
+                 speak_fail_count=0,
+                 listen_fail_count=0,
                  encyclopaedic=[],
                  function=[],
                  smell=[],
@@ -116,11 +129,14 @@ class Word:
         self.visual_colour = visual_colour
         self.visual_form_and_surface = visual_form_and_surface
         self.visual_motion = visual_motion
-        self.fail_count=0
+        self.speak_fail_count=speak_fail_count
+        self.listen_fail_count=listen_fail_count
     def todict(self):
         return {
             "obj": self.obj,
             "word": self.word,
+            "speak_fail_count":self.speak_fail_count,
+            "listen_fail_count":self.listen_fail_count,
             "encyclopaedic": self.encyclopaedic,
             "function": self.function,
             "smell": self.smell,
@@ -146,6 +162,19 @@ class Word:
             "visual_form_and_surface": self.visual_form_and_surface,
             "visual_motion": self.visual_motion
         }
+    def toFeatures(self):
+        return {
+            "encyclopaedic": self.encyclopaedic,
+            "function": self.function,
+            "smell": self.smell,
+            "sound": self.sound,
+            "tactile": self.tactile,
+            "taste": self.taste,
+            "taxonomic": self.taxonomic,
+            "visual_colour": self.visual_colour,
+            "visual_form_and_surface": self.visual_form_and_surface,
+            "visual_motion": self.visual_motion
+        }
     def change_word(self,word):
         self.word=word
         return
@@ -157,27 +186,49 @@ class WordDatabase:
         self.features_name = features_name
         features_loader=BRM_loader()
         features_loader.load_embedding(name=self.features_name)
-        self.embeddings_list=[]
-        self.search_dict={
-            tp: {feature:[] for feature in features_loader.df_list[tp]} for tp in list(features_loader.df_list.keys())    
-        }
+        self.embeddings_list=dict()
+        # self.search_dict={
+        #     tp: {feature:[] for feature in features_loader.df_list[tp]} for tp in list(features_loader.df_list.keys())    
+        # }
+        # self.search_dict={
+        #     tp: dict() for tp in list(features_loader.df_list.keys())    
+        # }
         self.word_dict=dict()
         self.word_to_key_dict=dict()
+        self.obj_dict=dict()
     def add_word(self,
                 text_embedding,
                 word: str,
                 obj: str,
-                encyclopaedic: str,
-                function: str,
-                smell: str,
-                sound: str,
-                tactile: str,
-                taste: str,
-                taxonomic: str,
-                visual_colour: str,
-                visual_form_and_surface: str,
-                visual_motion: str):
-        
+                encyclopaedic: list,
+                function: list,
+                smell: list,
+                sound: list,
+                tactile: list,
+                taste: list,
+                taxonomic: list,
+                visual_colour: list,
+                visual_form_and_surface: list,
+                visual_motion: list):
+        if word in self.get_word_list():
+            word_num_list=self.word_to_key_dict[word]
+            for num in word_num_list:
+                features=self.word_dict[num].toFeatures()
+                if features=={
+                    "encyclopaedic": encyclopaedic,
+                    "function": function,
+                    "smell": smell,
+                    "sound": sound,
+                    "tactile": tactile,
+                    "taste": taste,
+                    "taxonomic": taxonomic,
+                    "visual_colour": visual_colour,
+                    "visual_form_and_surface": visual_form_and_surface,
+                    "visual_motion": visual_motion
+                }:
+                    warnings.warn(f"The word {word} has already in the word database.",RuntimeWarning)
+                    return
+                    
         new_word=Word(
             obj=obj,
             word=word,
@@ -193,54 +244,30 @@ class WordDatabase:
             visual_motion=visual_motion,
         )
         
-        length=str(len(self.word_dict))
-        self.word_dict[str(length)]=new_word
+        new_num=str(np.max([int(num) for num in self.word_dict.keys()])+1) if self.word_dict else "0"
+        self.word_dict[str(new_num)]=new_word
         try:
-            self.word_to_key_dict[word].append(length)
+            self.word_to_key_dict[word].append(new_num)
         except:
-            self.word_to_key_dict[word]=[length]
-        for tp in self.search_dict.keys():
-            word_features=new_word.todict()[tp]
-            if not word_features:
-                continue
-            for feature in word_features:
-                try:
-                    self.search_dict[tp][feature].append(length) 
-                except:
-                    self.search_dict[tp][feature]=[length]
-        self.embeddings_list.append(text_embedding)
-        return
-    
-    def change_word(self,
-                encyclopaedic: str,
-                function: str,
-                smell: str,
-                sound: str,
-                tactile: str,
-                taste: str,
-                taxonomic: str,
-                visual_colour: str,
-                visual_form_and_surface: str,
-                visual_motion: str,
-                origin_word:str,
-                replace_word:str):
-        search_word_list=self.search_word(
-            encyclopaedic=encyclopaedic,
-            function=function,
-            smell=smell,
-            sound=sound,
-            tactile=tactile,
-            taste=taste,
-            taxonomic=taxonomic,
-            visual_colour=visual_colour,
-            visual_form_and_surface=visual_form_and_surface,
-            visual_motion=visual_motion,
-        )
-        for key in search_word_list:
-            if self.word_dict[key]==origin_word:
-                self.word_dict[key].change_word(replace_word)
-        return
-    
+            self.word_to_key_dict[word]=[new_num]
+        # for tp in self.search_dict.keys():
+        #     word_features=new_word.todict()[tp]
+        #     if not word_features:
+        #         continue
+        #     for feature in word_features:
+        #         try:
+        #             self.search_dict[tp][feature].append(new_num) 
+        #         except:
+        #             self.search_dict[tp][feature]=[new_num]
+        try:
+            self.obj_dict[obj].append(new_num)
+        except:
+            self.obj_dict[obj]=[new_num]
+        
+        if not (obj in list(self.embeddings_list.keys())):
+            self.embeddings_list[obj]=text_embedding
+          
+        return   
     def search_word(self, 
                     encyclopaedic,
                     function,
@@ -264,35 +291,42 @@ class WordDatabase:
             "visual_form_and_surface": visual_form_and_surface,
             "visual_motion": visual_motion,
         }
-        lists=[]
-        for tp,features in search_dict.items():
-            if features==[]:
-                continue
-            for feature in features:
-                try:
-                    lists.append(self.search_dict[tp][feature]) if self.search_dict[tp][feature]!=[] else None
-                except:
-                    pass
-        intersection=get_Intersection(lists)
-        for elem in intersection:
-            elem_dict=self.word_dict[elem].todict()
-            for key in list(search_dict.keys()):
-                if elem_dict[key]==search_dict[key]:
-                    pass
-                else:
-                    intersection.remove(elem)
-                    break
-        if len(intersection)==0:
-            return []
-        else:
-            return intersection
+        # lists=[]
+        # for tp,features in search_dict.items():
+        #     if features==[]:
+        #         continue
+        #     for feature in features:
+        #         try:
+        #             lists.append(self.search_dict[tp][feature]) if self.search_dict[tp][feature]!=[] else None
+        #         except:
+        #             pass
+        # intersection=get_Intersection(lists)
+        # for num in intersection:
+        #     features_dict=self.word_dict[num].toFeatures()
+        #     if features_dict!=search_dict:
+        #         intersection.remove(num)
+        # return intersection
+        num_list=[]
+        for num,word in self.word_dict.items():
+            word_features=word.toFeatures()
+            if word_features==search_dict:
+                num_list.append(num)
+        return num_list
         
-    def search_near_synonyms(self,text_embedding):
-        top_k_ids,_=find_most_similar_word(text_embedding,self.embeddings_list,k=10,similarity_threshold=0.85)
+    def search_near_synonyms(self,obj,text_embedding):
+        top_k_ids,_=find_most_similar_word(text_embedding,list(self.embeddings_list.values()),k=10,similarity_threshold=0.84)
         syn_list=[]
-        for id in top_k_ids:
-            word=self.word_dict[str(id)]
-            syn_list.append(word)
+        all_obj=list(self.embeddings_list.keys())
+        top_k_obj=[all_obj[id] for id in top_k_ids]
+        for i in top_k_obj:
+            words=self.obj_dict[i]
+            syn_list+=words
+        try:
+            num_list=self.obj_dict[obj]
+            for num in num_list:
+                syn_list.remove(num)
+        except:
+            pass
         return syn_list
     #TODO 修改使得匹配新的数据结构        
     def search_resembling_word(self,target_word):
@@ -303,17 +337,40 @@ class WordDatabase:
             return []
 
         distances = []
-        for word in self.word_dict.keys():
-            try:
-                blocks = split_cv_blocks(word)
-                dist = edit_distance_cv_blocks(target_blocks, blocks)
-                distances.append((word, dist))
-            except ValueError:
-                continue  # 跳过非法词
-
-        distances.sort(key=lambda x: x[1])
-        return distances[:10] if len(distances) >= 10 else distances
-         
+        for word in self.word_to_key_dict.keys():
+            if word!=target_word:
+                try:
+                    blocks = split_cv_blocks(word)
+                    # dist = edit_distance_cv_blocks(target_blocks, blocks)
+                    # similarity=1-dist/max(len(blocks),len(target_blocks))
+                    similarity= Jaccard_similarity(target_blocks, blocks, n=2)+ Jaccard_similarity(target_blocks, blocks, n=3)+\
+                                Jaccard_similarity(target_blocks, blocks, n=4)+Jaccard_similarity(target_blocks, blocks, n=5)
+                    # similarity=1/(1+dist)
+                    if similarity>0:
+                        distances.append(word)
+                except Exception as e:
+                    continue  # 跳过非法词
+        random.shuffle(distances)
+        return distances
+    def weight_output(self,num_list,identity,beta=1.3):
+        if not (identity in ["speaker","listener"]):
+            raise ValueError("identity must be 'speaker' or 'listener'. ")
+        if not num_list:
+            return None
+        if not set(num_list).issubset(set(self.word_dict.keys())):
+            raise ValueError("There are numbers in the list that are not in the word database.")
+        total=0
+        weights=[]
+        for num in num_list:
+            if identity=="speaker":
+                word_fail_count=self.word_dict[num].speak_fail_count
+            else:
+                word_fail_count=self.word_dict[num].listen_fail_count
+            exp_num=np.exp(-word_fail_count*beta)
+            total+=exp_num
+            weights.append(exp_num)
+        weights=[weight/total for weight in weights]
+        return weights     
     #TODO how to save &load word_dict   
     def load(self,path):
         with open(os.path.join(path,"word_dict.json"),"r",encoding="utf-8") as f:
@@ -322,10 +379,12 @@ class WordDatabase:
             self.word_dict[key]=Word(**load_dict[key])
         with open(os.path.join(path,"word_to_key_dict.json"),"r",encoding="utf-8") as f:
             self.word_to_key_dict=json.load(f)
-        with open(os.path.join(path,"search_dict.json"),"r",encoding="utf-8") as f:
-            self.search_dict=json.load(f)
+        # with open(os.path.join(path,"search_dict.json"),"r",encoding="utf-8") as f:
+        #     self.search_dict=json.load(f)
         with open(os.path.join(path,"embeddings_list.json"),"r",encoding="utf-8") as f:
             self.embeddings_list=json.load(f)
+        with open(os.path.join(path,"obj_dict.json"),"r",encoding="utf-8") as f:
+            self.obj_dict=json.load(f)
         return
     
     def save(self,path):
@@ -339,10 +398,44 @@ class WordDatabase:
             json.dump(self.embeddings_list,f,ensure_ascii=False,indent=4)
         with open(os.path.join(path,"word_to_key_dict.json"),"w",encoding="utf-8") as f:
             json.dump(self.word_to_key_dict,f,ensure_ascii=False,indent=4)
-        with open(os.path.join(path,"search_dict.json"),"w",encoding="utf-8") as f:
-            json.dump(self.search_dict,f,ensure_ascii=False,indent=4)
+        # with open(os.path.join(path,"search_dict.json"),"w",encoding="utf-8") as f:
+        #     json.dump(self.search_dict,f,ensure_ascii=False,indent=4)
+        with open(os.path.join(path,"obj_dict.json"),"w",encoding="utf-8") as f:
+            json.dump(self.obj_dict,f,ensure_ascii=False,indent=4)
         return
        
     def get_word_list(self):
         word_list=list(self.word_to_key_dict.keys())
         return word_list
+    
+    def delete(self,num):
+        num=str(num)
+        if not (num in list(self.word_dict.keys())):
+            warnings.warn(f"The num {num} is not in the word database.",RuntimeWarning)
+            return
+        del self.word_dict[num]
+        word_remove_list=[]
+        for word,num_list in self.word_to_key_dict.items():
+            if num in num_list:
+                num_list.remove(num)
+                if num_list==[]:
+                    word_remove_list.append(word)
+        for word in word_remove_list:
+            del self.word_to_key_dict[word]
+        
+        obj_remove_list=[]            
+        for obj,num_list in self.obj_dict.items():
+            if num in num_list:
+                num_list.remove(num)
+                if num_list==[]:
+                    obj_remove_list.append(obj)
+        for obj in obj_remove_list:
+            del self.obj_dict[obj]
+            del self.embeddings_list[obj]
+        
+        # for tp in self.search_dict.keys():
+        #     for feature in tp.keys():
+        #         if num in self.search_dict[tp][feature]:
+        #             self.search_dict[tp][feature].remove(num)
+        
+        

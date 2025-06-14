@@ -16,16 +16,19 @@ semantically related) as the **GIVEN WORD**.
 !<INPUT 4>!
 
 **REQUIREMENTS:**
-
-1. You may select up to ten words. If your learned vocabulary contains fewer than !<INPUT 1>! words, or if you believe 
-there are fewer than ten relevant words in it, just select all the words you consider to meet the criteria. There is no 
-need to force a total of !<INPUT 1>! words.
-
-2. Please output the result strictly in JSON format as a list, where each element is a string representing a selected 
+1. Please output the result strictly in JSON format as a list, where each element is a string representing a selected 
 word.
 
-3. This artificial language follows characteristics of natural languages. Therefore, the information in the 
+2. This artificial language follows characteristics of natural languages. Therefore, the information in the 
 **LEARNED VOCABULARY** may be crucial for your selecting. Please reference it carefully and thoughtfully.
+
+3.You must choose words that are similar in morphological form with strict standards The words you have chosen should 
+meet at least one of the following conditions:
+
+*Has the same prefix as the **GIVEN WORD**
+*Has the same suffix as the **GIVEN WORD**
+*Has the same main body as the **GIVEN WORD**
+*Has same letter sequence at a similar position with **GIVEN WORD**
 
 **EXPECTED FORMAT:**
 

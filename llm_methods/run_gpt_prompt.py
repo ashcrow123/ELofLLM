@@ -183,7 +183,7 @@ def run_gpt_prompt_speaker_generate(letters_count,
                               letters_list,
                               vocab,
                               obj_properties,
-                              player_num,
+                              player_id,
                               failed_records,
                               verbose=True):
     prompt_template="prompt/speaker_generate.txt"
@@ -221,12 +221,17 @@ def run_gpt_prompt_speaker_generate(letters_count,
                         letters_list=letters_list,
                         prompt=None,):
         try:
-            gpt_response="".join(gpt_response.split("-"))
-            blocks=split_cv_blocks(gpt_response)
+            gpt_response=json.loads(deal_json_format(gpt_response))
+            word=gpt_response.get("word","")
+            if (not word) or (not isinstance(word, str)):
+                return False
+            word="".join(word.split("-"))
+            blocks=split_cv_blocks(word)
             for letter in blocks:
                 if letter not in letters_list:
                     return False
-            if len(gpt_response)>=6 and len(gpt_response)<=24:
+            if len(word)>=4 and len(word)<=12:
+                gpt_response["word"]=word
                 return gpt_response
             else:
                 return False
@@ -265,7 +270,7 @@ def run_gpt_prompt_speaker_generate(letters_count,
     if verbose:
         print_run_prompts(
             prompt_template=prompt_template,
-            player_num=player_num,
+            player_id=player_id,
             prompt=prompt,
             output=output,
         )
@@ -277,7 +282,7 @@ def run_gpt_prompt_select_resembling_words(letters_count,
                               letters_list,
                               vocab,
                               given_word,
-                              player_num,
+                              player_id,
                               verbose=True):
     prompt_template="prompt/select_resembling_words.txt"
     def create_prompt(letters_count,
@@ -357,7 +362,7 @@ def run_gpt_prompt_select_resembling_words(letters_count,
     if verbose:
         print_run_prompts(
             prompt_template=prompt_template,
-            player_num=player_num,
+            player_id=player_id,
             prompt=prompt,
             output=output,
         )
@@ -369,7 +374,7 @@ def run_gpt_prompt_listener_decide(letters_count,
                               vocab,
                               given_word,
                               semantic_features,
-                              player_num,
+                              player_id,
                               verbose=True):
     prompt_template="prompt/listener_decide.txt"
     def create_prompt(letters_count,
@@ -405,7 +410,12 @@ def run_gpt_prompt_listener_decide(letters_count,
     def __func_clean_up(gpt_response,
                         prompt=None,):
         try:
-            if gpt_response in ["A","B","C",]:
+            gpt_response=json.loads(deal_json_format(gpt_response))
+            option=gpt_response.get("option","")
+            if not option or not isinstance(option, str):
+                return False
+            option=option.strip().upper()
+            if option in ["A","B","C","D","E"]:
                 return gpt_response  
             else:
                 return False       
@@ -444,7 +454,7 @@ def run_gpt_prompt_listener_decide(letters_count,
     if verbose:
         print_run_prompts(
             prompt_template=prompt_template,
-            player_num=player_num,
+            player_id=player_id,
             prompt=prompt,
             output=output,
         )

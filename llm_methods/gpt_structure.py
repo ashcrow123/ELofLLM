@@ -4,7 +4,7 @@ import os
 import tiktoken
 import openai
 import numpy as np
-
+import base64
 openai_api_key=os.environ.get("OPENAI_API_KEY")
 api_base = os.environ.get("OPENAI_API_BASE")
 
@@ -197,13 +197,13 @@ def format_set_as_table(data_set):
   
 def print_run_prompts(
     prompt_template=None,
-    player_num=None,
+    player_id=None,
     prompt=None,
     output=None,
 ):
     print(f"=== {prompt_template}")
     print("~~~ persona    ---------------------------------------------------")
-    print(player_num, "\n")
+    print(player_id, "\n")
     print("~~~ prompt     ---------------------------------------------------")
     print(prompt, "\n")
     print("~~~ output    ----------------------------------------------------")
@@ -213,14 +213,26 @@ def print_run_prompts(
     
 
 if __name__=="__main__":
-    prompt_1="a baby bird"
-    prompt_2="a baby bird"
-    prompt=[prompt_1,prompt_2,prompt_1]
-    embeds=text_embedding_request(prompt)
-    print(embeds[0]==embeds[2])
-    
-    
-    
+    text_list=[
+        "be an ant",
+        'is an insect',
+        'can bites',
+        'can crawls',
+        'has 6 legs',
+        'has antennae',
+        'is black',
+        'is red',
+        'is small',
+        'is strong',
+        'lives in a colony',
+        'lives in a hill',
+        'lives in ground'
+        ]
+    text_embeddings=text_embedding_request([text_list[0],"be a bee"])
+    similarity=np.dot(text_embeddings[0], text_embeddings[1]) / (
+        np.linalg.norm(text_embeddings[0]) * np.linalg.norm(text_embeddings[1])
+    )
+    print(similarity)
     
     
     
