@@ -185,7 +185,100 @@ class Referential_Game:
             "speaker_near_synonyms":[word['word'] for word in speaker_near_synonyms],
             "speaker_known_vocab":speaker_known_vocab
         }
-
+    def test_communicate(
+                    self,
+                    speaker_id:str,
+                    listener_id:str,
+                    obj_dict:dict):
+            speaker=self.players[speaker_id]
+            listener=self.players[listener_id]
+            round=0
+            success=False
+            word_list=[]
+            choices_list=[]
+            corr_obj=list(self.obj_loader.keys())[(self.round-1)%len(self.obj_loader.keys())]
+            corr_obj_embedding=text_embedding_request(corr_obj)
+            obj_features_dict={**obj_dict,**{corr_obj:self.obj_loader[corr_obj]}}
+            obj_pairs=[(key,value) for key,value in obj_features_dict.items()]
+            random.shuffle(obj_pairs)
+            obj_features_dict=dict(obj_pairs)
+            obj_list=list(obj_features_dict.keys())
+            select_features_dict=dict()
+            choices_dict=dict()
+            choices="ABCDE"
+            for i in range(len(obj_list)):
+                choices_dict[choices[i]]=obj_list[i]
+                select_features_dict[choices[i]]=obj_features_dict[obj_list[i]]
+            speaker_known_vocab_num=speaker.word_database.search_word(**obj_features_dict[corr_obj])
+            random.shuffle(speaker_known_vocab_num)
+            speaker_known_vocab=[speaker.word_database.word_dict[num].word for num in speaker_known_vocab_num]
+            speaker_near_synonyms=[speaker.word_database.word_dict[num].todict_wo_object() for num in speaker.word_database.search_near_synonyms(corr_obj,corr_obj_embedding)]
+            speaker_short_memory=[]
+            while True: 
+                round+=1
+                if speaker_known_vocab_num:
+                    weights=speaker.word_database.weight_output(speaker_known_vocab_num,"speaker")
+                    for i in reversed(range(len(weights))):
+                        if weights[i]<=0.1:
+                            speaker.word_database.delete(speaker_known_vocab_num[i])
+                            speaker_known_vocab_num.pop(i)
+                            speaker_known_vocab.pop(i)
+                if round<=self.comm_num:
+                    if speaker_known_vocab_num:
+                        weights=speaker.word_database.weight_output(speaker_known_vocab_num,"speaker")
+                        word_num=random.choices(speaker_known_vocab_num,weights=weights,k=1)[0]
+                        speaker_known_vocab_num.remove(word_num)
+                        word=speaker.word_database.word_dict[word_num].word
+                        word_exists,choice,used_num=listener.listener_select(
+                        word=word,
+                        sf_dict=select_features_dict,
+                        )
+                        choices_list.append(choice)
+                        if choices_dict[choice]==corr_obj:
+                            success=True
+                            word_list.append(word)
+                            break
+                        else:
+                            short_memory={
+                                word:obj_features_dict[choices_dict[choice]],
+                            }
+                            speaker_short_memory.append(short_memory)
+                            word_list.append(word)
+                    else:
+                        word=speaker.generate_new_word(
+                            vocab=speaker_near_synonyms,
+                            obj_features=obj_features_dict[corr_obj],
+                            failed_records=speaker_short_memory,
+                        )  
+                        word_exists,choice,used_num=listener.listener_select(
+                            word=word,
+                            sf_dict=select_features_dict,
+                        )
+                        choices_list.append(choice)
+                        if choices_dict[choice]==corr_obj:
+                            success=True
+                            word_list.append(word)
+                            break
+                        else:
+                            short_memory={
+                                word:obj_features_dict[choices_dict[choice]],
+                            }
+                            speaker_short_memory.append(short_memory)
+                            word_list.append(word)
+                else:
+                    break
+            return {
+                "speaker_id":speaker_id,
+                "listener_id":listener_id,
+                "success":success,
+                "word_list":word_list,
+                "obj_list":obj_list,
+                "corr_obj":corr_obj,
+                "choices_list":choices_list,
+                "speaker_near_synonyms":[word['word'] for word in speaker_near_synonyms],
+                "speaker_known_vocab":speaker_known_vocab
+            }
+        
     def run(self,rounds):
         save_flag=0
         for _ in range(rounds):
@@ -214,7 +307,31 @@ class Referential_Game:
                 self.save(results,True)
             else:
                 self.save(results,False)
-            
+                
+    def test_run(self,rounds):
+        for _ in range(rounds):
+            results=[]
+            self.round+=1
+            player_ids=[str(i) for i in range(self.player_num)]
+            random.shuffle(player_ids)
+            pairs=[]
+            for i in range(0,self.player_num,2):
+                pairs.append((player_ids[i],player_ids[i+1]))
+            print(pairs)
+            for pair in pairs:
+                corr_obj=list(self.obj_loader.keys())[(self.round-1)%len(self.obj_loader)]
+                keys_list=list(self.obj_loader.keys())
+                keys_list.remove(corr_obj)
+                random_keys=random.sample(keys_list,k=4)
+                obj_dict={obj:self.obj_loader[obj] for obj in random_keys}
+                result=self.test_communicate(
+                    speaker_id=pair[0],
+                    listener_id=pair[1],
+                    obj_dict=obj_dict,
+                )
+                results.append(result)
+            self.save(results,False)
+                        
     def save(self,results,with_worddatabase):
         round_path=f"./sim_storage/{self.name}/round_{self.round}"
         try:
@@ -439,18 +556,36 @@ class one_word_game(Referential_Game):
                                       
 if __name__=="__main__":
     letter_list=select_letters(num=10,seed=42)
-    obj_loader=load_object_feature_pairs(42,400)
-    print(letter_list)
+    # obj_loader=load_object_feature_pairs(42,400)
+    # print(letter_list)
+    # g1=Referential_Game(
+    #     name="41mini_2",
+    #     player_num=2,
+    #     letter_list=letter_list,
+    #     comm_num=3,
+    #     save_interval=4,
+    #     obj_loader=obj_loader
+    # )
+    # g1.run(1600) 
+    
+    train_loader=load_object_feature_pairs(42,400)
+    all_loader=load_object_feature_pairs()
+    obj_loader=dict()
+    for key,value in all_loader.items():
+        if not (key in train_loader):
+            obj_loader[key]=value
     g1=Referential_Game(
-        name="2p_l42_o42_w400",
+        name="41mini_2",
         player_num=2,
         letter_list=letter_list,
         comm_num=3,
         save_interval=4,
         obj_loader=obj_loader
     )
-    g1.load(400)
-    g1.run(400)
+    g1.load(1600)
+    rounds=len(obj_loader)
+    
+    g1.test_run(rounds) 
     
     
 

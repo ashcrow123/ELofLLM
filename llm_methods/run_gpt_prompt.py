@@ -246,7 +246,7 @@ def run_gpt_prompt_speaker_generate(letters_count,
     fail_safe=get_fail_safe()
     
     gpt_param = {
-        "model":"gpt-4.1",
+        "model":"gpt-4.1-mini",
         "max_tokens": 4096,
         "top_p": 1,
         "frequency_penalty": 0,
@@ -429,7 +429,7 @@ def run_gpt_prompt_listener_decide(letters_count,
     fail_safe=get_fail_safe()
     
     gpt_param = {
-        "model":"gpt-4.1",
+        "model":"gpt-4.1-mini",
         "max_tokens": 4096,
         "top_p": 1,
         "frequency_penalty": 0,

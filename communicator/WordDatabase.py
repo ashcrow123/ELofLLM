@@ -1,9 +1,11 @@
 from data_loader.BRM_loader import BRM_loader
+from llm_methods.gpt_structure import text_embedding_request
 import numpy as np
 import json
 import os
 import warnings
 import random
+import time
 def split_cv_blocks(word):
     """将单词分割成辅音+元音组合块"""
     blocks = []
@@ -379,12 +381,14 @@ class WordDatabase:
             self.word_dict[key]=Word(**load_dict[key])
         with open(os.path.join(path,"word_to_key_dict.json"),"r",encoding="utf-8") as f:
             self.word_to_key_dict=json.load(f)
-        # with open(os.path.join(path,"search_dict.json"),"r",encoding="utf-8") as f:
-        #     self.search_dict=json.load(f)
-        with open(os.path.join(path,"embeddings_list.json"),"r",encoding="utf-8") as f:
-            self.embeddings_list=json.load(f)
+        # with open(os.path.join(path,"embeddings_list.json"),"r",encoding="utf-8") as f:
+        #     self.embeddings_list=json.load(f)
         with open(os.path.join(path,"obj_dict.json"),"r",encoding="utf-8") as f:
             self.obj_dict=json.load(f)
+        embeddings_list=text_embedding_request(list(self.obj_dict.keys()))
+        for i in range(len(embeddings_list)):
+            self.embeddings_list[list(self.obj_dict.keys())[i]]=embeddings_list[i]
+        time.sleep(2)
         return
     
     def save(self,path):
@@ -394,8 +398,8 @@ class WordDatabase:
             save_dict[key]=self.word_dict[key].todict()
         with open(os.path.join(path,"word_dict.json"),"w",encoding="utf-8") as f:
             json.dump(save_dict,f,ensure_ascii=False,indent=4)
-        with open(os.path.join(path,"embeddings_list.json"),"w",encoding="utf-8") as f:
-            json.dump(self.embeddings_list,f,ensure_ascii=False,indent=4)
+        # with open(os.path.join(path,"embeddings_list.json"),"w",encoding="utf-8") as f:
+        #     json.dump(self.embeddings_list,f,ensure_ascii=False,indent=4)
         with open(os.path.join(path,"word_to_key_dict.json"),"w",encoding="utf-8") as f:
             json.dump(self.word_to_key_dict,f,ensure_ascii=False,indent=4)
         # with open(os.path.join(path,"search_dict.json"),"w",encoding="utf-8") as f:

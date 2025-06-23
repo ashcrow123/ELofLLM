@@ -12,7 +12,7 @@ class communicator:
         self.word_database.save(path)
     def load(self,path):
         self.word_database.load(path)  
-          
+        print(f"player_{self.player_id} has loaded word database.")  
     def generate_new_word(
         self,                   
         vocab,
@@ -38,22 +38,23 @@ class communicator:
         word_exists=False
         try:
             word_nums=self.word_database.word_to_key_dict[word]
-            weights=self.word_database.weight_output(word_nums,"listener")
-            if weights==None:
-                raise KeyError
-            for i in reversed(range(len(weights))):
-                if weights[i]<=0.1:
-                    self.word_database.delete(word_nums[i])
-                    word_nums.pop(i)
-            weights=self.word_database.weight_output(word_nums,"listener")
-            num=random.choices(word_nums,weights=weights,k=1)[0]
+            # weights=self.word_database.weight_output(word_nums,"listener")
+            # if weights==None:
+            #     raise KeyError
+            # for i in reversed(range(len(weights))):
+            #     if weights[i]<=0.1:
+            #         self.word_database.delete(word_nums[i])
+            #         word_nums.pop(i)
+            # weights=self.word_database.weight_output(word_nums,"listener")
+            # num=random.choices(word_nums,weights=weights,k=1)[0]
             # num=random.choice(word_nums)
-            semantic_features=self.word_database.word_dict[num].toFeatures()
-            for key,value in sf_dict.items():
-                if value==semantic_features:
-                    word_exists=True
-                    self.word_database.word_dict[num].listen_fail_count-=1
-                    return word_exists,key,num
+            for num in word_nums:
+                semantic_features=self.word_database.word_dict[num].toFeatures()
+                for key,value in sf_dict.items():
+                    if value==semantic_features:
+                        word_exists=True
+                        self.word_database.word_dict[num].listen_fail_count-=1
+                        return word_exists,key,num
         except KeyError as e:
             pass
         except Exception as e:
