@@ -5,3 +5,4 @@ sim_storage
 statistic
 image/
 __pycache__
+plot.py
