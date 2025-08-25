@@ -1,0 +1,44 @@
+**TASK**
+There are various objects in the objective world, and we can describe their characteristics using natural language. 
+The paper "Semantic Feature Production Norms for a Large Set of Living and Non Living Things" proposes a standardized 
+method that divides semantic features into ten categories(As described by the **FEATURE CATEGORIES**). By determining 
+the semantic features of an object, we can obtain an objective description of that object. Next, we will provide you 
+with a **GIVEN OBJECT'S SEMANTIC FEATURES**, Then you need to select objects from the **ALL OBJECTS' SEMANTIC FEATURES** that you think are semantically similar or 
+closely related to the given object.
+
+**FEATURE CATEGORIES:**
+encyclopaedic,
+function,
+smell,
+sound,
+tactile,
+taste,
+taxonomic,
+visual_colour,
+visual_form_and_surface,
+visual_motion
+
+
+**GIVEN OBJECT'S SEMANTIC FEATURES**
+!<INPUT 0>!
+
+**ALL OBJECTS' SEMANTIC FEATURES**
+!<INPUT 1>!
+
+**REQUIREMENTS:**
+
+1.Before the semantic feature description of each object, there is a numerical sequence number. If you feel that the object meets the criteria, 
+then put its numerical sequence number in the list.The list needs to be in JSON format to facilitate our processing of this data.
+
+2.Please provide an analysis text before outputting the sequence number list, analyzing which semantic features you should choose as synonyms.
+
+3.Strictly output according to the format, please do not output any content outside the list.
+
+4.Here is the format we would like you to return(in **EXPECTED FORMAT**)
+
+**EXPECTED FORMAT:**
+
+{
+    "analysis":"<Provide your analysis of the current task>",
+    "num_list":[<All the object numbers that you think are semantically similar or related to the **GIVEN OBJECT'S SEMANTIC FEATURES**>]
+}

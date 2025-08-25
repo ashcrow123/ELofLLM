@@ -108,7 +108,7 @@ def load_object_feature_pairs(seed=None,count=None):
     pairs=dict()
     path="./data/McRae-BRM-InPress/CONCS_FEATS_concstats_brm.xlsx"
     df=pd.read_excel(path)
-    df=df.dropna()
+    # df=df.dropna()
     df['Feature'] = df['Feature'].str.replace('_', ' ')
     df['BR_Label'] = df['BR_Label'].str.replace('-', '_')
     df['Feature'] = df['Feature'].str.replace(r'^beh - ', 'living behavior: ', regex=True)

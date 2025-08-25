@@ -1,5 +1,7 @@
 from llm_methods.gpt_structure import *
 def deal_json_format(text):
+    text=text.replace("**EXPECTED FORMAT:**","")
+    text="{"+text.split("{")[-1]
     text=text.replace('json',"")
     text=text.replace('`','')
     text=text.strip()
@@ -37,18 +39,21 @@ def dict_list_to_str(dict_list):
     return '\n'.join(str(d) for d in dict_list)
 
 def split_cv_blocks(word):
-    """将单词分割成辅音+元音组合块"""
-    blocks = []
-    i = 0
-    while i < len(word) - 1:
-        c, v = word[i], word[i+1]
-        if c.lower() in "bcdfghjklmnpqrstvwxyz" and v.lower() in "aeiou":
-            blocks.append(c + v)
-            i += 2
-        else:
-            raise ValueError(f"Invalid CV block at position {i}: {c+v}")
-    if i < len(word): 
-        raise ValueError(f"Word has leftover characters at the end: {word[i:]}")
+    # """将单词分割成辅音+元音组合块"""
+    # if "-" in word:
+    #     word="".join(word.split("-"))
+    # blocks = []
+    # i = 0
+    # while i < len(word) - 1:
+    #     c, v = word[i], word[i+1]
+    #     if c.lower() in "bcdfghjklmnpqrstvwxyz" and v.lower() in "aeiou":
+    #         blocks.append(c + v)
+    #         i += 2
+    #     else:
+    #         raise ValueError(f"Invalid CV block at position {i}: {c+v}")
+    # if i < len(word): 
+    #     raise ValueError(f"Word has leftover characters at the end: {word[i:]}")
+    blocks=word.split("-")
     return blocks
 
 def run_gpt_prompt_wo_vocab(prompt,
@@ -185,6 +190,8 @@ def run_gpt_prompt_speaker_generate(letters_count,
                               obj_properties,
                               player_id,
                               failed_records,
+                              max_length,
+                              model,
                               verbose=True):
     prompt_template="prompt/speaker_generate.txt"
     def create_prompt(letters_count,
@@ -200,6 +207,7 @@ def run_gpt_prompt_speaker_generate(letters_count,
         input_list.append(dict_list_to_str(vocab))
         input_list.append(str(obj_properties))
         input_list.append(json.dumps(failed_records))
+        input_list.append(str(max_length))
         prompt=generate_prompt(
             input_list,
             prompt_template
@@ -225,13 +233,13 @@ def run_gpt_prompt_speaker_generate(letters_count,
             word=gpt_response.get("word","")
             if (not word) or (not isinstance(word, str)):
                 return False
-            word="".join(word.split("-"))
+
             blocks=split_cv_blocks(word)
             for letter in blocks:
                 if letter not in letters_list:
                     return False
-            if len(word)>=4 and len(word)<=12:
-                gpt_response["word"]=word
+            if len(blocks)>=1 and len(blocks)<=max_length:
+                # gpt_response["word"]=word
                 return gpt_response
             else:
                 return False
@@ -246,7 +254,7 @@ def run_gpt_prompt_speaker_generate(letters_count,
     fail_safe=get_fail_safe()
     
     gpt_param = {
-        "model":"gpt-4.1-mini",
+        "model":model,
         "max_tokens": 4096,
         "top_p": 1,
         "frequency_penalty": 0,
@@ -283,6 +291,7 @@ def run_gpt_prompt_select_resembling_words(letters_count,
                               vocab,
                               given_word,
                               player_id,
+                              model,
                               verbose=True):
     prompt_template="prompt/select_resembling_words.txt"
     def create_prompt(letters_count,
@@ -320,12 +329,18 @@ def run_gpt_prompt_select_resembling_words(letters_count,
                         prompt=None,):
         try:
             gpt_response=json.loads(deal_json_format(gpt_response))
-            if len(gpt_response)>10:
-                return False
-            if gpt_response:
-                for word in gpt_response:
-                    if word not in vocab:
+            num_list=gpt_response.get("num_list",[])
+            # if len(gpt_response)>10:
+            #     return False
+            if num_list:
+                for num in num_list:
+                    if num >len(vocab):
                         return False
+            word_list=[]
+            if num_list:
+                for num in num_list:
+                    word_list.append(vocab[num-1])
+            gpt_response["word_list"]=word_list
             return gpt_response            
         except:
             return False
@@ -337,7 +352,7 @@ def run_gpt_prompt_select_resembling_words(letters_count,
     fail_safe=get_fail_safe()
     
     gpt_param = {
-        "model":"gpt-4.1",
+        "model":model,
         "max_tokens": 4096,
         "top_p": 1,
         "frequency_penalty": 0,
@@ -375,6 +390,7 @@ def run_gpt_prompt_listener_decide(letters_count,
                               given_word,
                               semantic_features,
                               player_id,
+                              model,
                               verbose=True):
     prompt_template="prompt/listener_decide.txt"
     def create_prompt(letters_count,
@@ -429,7 +445,7 @@ def run_gpt_prompt_listener_decide(letters_count,
     fail_safe=get_fail_safe()
     
     gpt_param = {
-        "model":"gpt-4.1-mini",
+        "model":model,
         "max_tokens": 4096,
         "top_p": 1,
         "frequency_penalty": 0,
@@ -542,4 +558,88 @@ def run_gpt_prompt_select_feature(word,
     
     return output
 
+def run_gpt_prompt_select_synonyms(
+                              object_features,
+                              features_list:list,
+                              model,
+                              verbose=True):
+    prompt_template="prompt/select_synonyms.txt"
+    def create_prompt(
+                      object_features:dict,
+                      features_list:list,
+                      prompt_template=prompt_template):
+        
+        input_list=[]
+        input_list.append(str(object_features))
+        all_features_str=""
+        for i in range(len(features_list)):
+            all_features_str+=f"{i}:"+str(features_list[i])+"\n"
+        input_list.append(all_features_str)    
+        
+        prompt=generate_prompt(
+            input_list,
+            prompt_template
+        )
+        return prompt,input_list
+    
+    
+    def __func_validate(gpt_response,
+                        prompt=None):
+        try:
+            if __func_clean_up(gpt_response):
+                return True
+            return False
+        except Exception as e:
+            print(e)
+            return False
 
+    def __func_clean_up(gpt_response,
+                        prompt=None):
+        try:
+            gpt_response=json.loads(deal_json_format(gpt_response))
+            num_list=gpt_response.get("num_list",[])
+            if type(num_list) is list:
+                for num in num_list:
+                    if not isinstance(num,int) or num>=len(features_list):
+                        return False
+                return gpt_response
+            else:
+                return False
+                    
+        except:
+            return False
+
+    def get_fail_safe():
+        fs = "Error:The output of GPT is illegal."
+        return fs
+    
+    fail_safe=get_fail_safe()
+    
+    gpt_param = {
+        "model":model,
+        "max_tokens": 4096,
+        "top_p": 1,
+        "frequency_penalty": 0,
+        "presence_penalty": 0,
+        "temperature": 0.1
+    }
+    prompt,input_list=create_prompt(object_features=object_features,
+                                    features_list=features_list)
+    
+    output = safe_generate_response(
+        prompt, 
+        gpt_param, 
+        10, 
+        fail_safe, 
+        __func_validate, 
+        __func_clean_up
+    )
+    if verbose:
+        print_run_prompts(
+            prompt_template=prompt_template,
+            player_id=None,
+            prompt=prompt,
+            output=output,
+        )
+    
+    return output

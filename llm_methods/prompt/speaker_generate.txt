@@ -1,9 +1,6 @@
 **TASK:**
 You are a language learner. You are studying a special artificial language that has !<INPUT 0>! letters. 
-These letters are each a combination of one consonant letter and one vowel letter from the English alphabet. 
-You can see them in the **LETTERS** section. This artificial language shares properties similar to natural 
-languages, such as Morphological Properties, Syntactic Properties, Semantic Properties, Productivity and 
-Creativity, and Ambiguity. Your task is to generate a word to express **OBJECT PROPERTIES**, which will be sent 
+You can see them in the **LETTERS** section. Your task is to generate a word to express **OBJECT PROPERTIES**, which will be sent 
 to your other language learner for he to guess the current **OBJECT PROPERTIES**. You will be given your own 
 **LEARNED VOCABULARY**, which can help you generate correct words. In addition, this is a multi round communication 
 process, and the **FAILED COMMUNICATION RECORDS** between you and your partner will be provided. 
@@ -28,22 +25,22 @@ value being your partner's incorrect understanding of the word.
 the **LETTERS** listed.
 
 2. You may reuse the same letter in the word, But the total number of letters used (including duplicates) must 
-be between 2 and 6.
+be between 1 and !<INPUT 5>!.
 
-3. This artificial language follows characteristics of natural languages. Therefore, the information in the 
-**LEARNED VOCABULARY** may be crucial to forming your new word. Please reference it carefully and thoughtfully.
+3. The information in the **LEARNED VOCABULARY** may be crucial to forming your new word. Please reference it carefully and thoughtfully.
 
 4.If the **FAILED COMMUNICATION RECORDS** is empty, it means that you and your partner are communicating for the first time.
 
 5.The **FAILED COMMUNICATION RECORDS** reflect your shortcomings in artificial language learning, which have caused
  you and your peers to be unable to align. Based on this information, carefully consider and regenerate a new word.
 
-6.To ensure the standardization of the output, use the symbol '-' to space the letters in the word.
-For example, <letter_1>-<letter-2>-<letter-3>-<letter-4>
+6.For your convenience in observation and decision-making, all letters in words provided to you are separated by a "-".To ensure the 
+standardization of the output, use the symbol '-' to space the letters in the word.
+For example, <letter_1>-<letter_2>-<letter_3>-<letter_4>
 
 7.Before you output the word, do a brief analysis of the words you want to output to help you output more suitable word.
 
-8.Output in json format, like **EXPECTED FORMAT**.
+8.Output analysis and word in json format, like **EXPECTED FORMAT**, please do not output any additional content.
 
 **EXPECTED FORMAT:**
 {

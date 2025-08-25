@@ -55,6 +55,25 @@ def GPT_4o_request(prompt, gpt_parameter):
 
 def text_embedding_request(prompt, 
                            model="text-embedding-ada-002",):
+    # if type(prompt) is str:
+    #     response = client.embeddings.create(
+    #         model=model, 
+    #         input=[prompt],
+    #         )
+    #     embedding = response.data[0].embedding
+    # elif type(prompt) is list:
+    #     response = client.embeddings.create(
+    #         model=model, 
+    #         input=prompt,
+    #         )
+    #     embedding = [item.embedding for item in response.data]
+    # else:
+    #     raise ValueError("The input must be a string or a list.")
+    # return embedding
+    return None
+
+def text_embedding_request_v2(prompt, 
+                           model="text-embedding-ada-002",):
     if type(prompt) is str:
         response = client.embeddings.create(
             model=model, 
@@ -69,7 +88,7 @@ def text_embedding_request(prompt,
         embedding = [item.embedding for item in response.data]
     else:
         raise ValueError("The input must be a string or a list.")
-    return embedding
+    return embedding   
   
 def safe_generate_response(
     prompt,
@@ -213,26 +232,7 @@ def print_run_prompts(
     
 
 if __name__=="__main__":
-    text_list=[
-        "be an ant",
-        'is an insect',
-        'can bites',
-        'can crawls',
-        'has 6 legs',
-        'has antennae',
-        'is black',
-        'is red',
-        'is small',
-        'is strong',
-        'lives in a colony',
-        'lives in a hill',
-        'lives in ground'
-        ]
-    text_embeddings=text_embedding_request([text_list[0],"be a bee"])
-    similarity=np.dot(text_embeddings[0], text_embeddings[1]) / (
-        np.linalg.norm(text_embeddings[0]) * np.linalg.norm(text_embeddings[1])
-    )
-    print(similarity)
+    pass
     
     
     

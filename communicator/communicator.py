@@ -4,10 +4,12 @@ from llm_methods.run_gpt_prompt import *
 import random
 
 class communicator:
-    def __init__(self,letter_list,id):
+    def __init__(self,letter_list,id,max_length,model):
         self.letter_list=letter_list
-        self.word_database=WordDatabase()
+        self.word_database=WordDatabase(model=model)
         self.player_id=id
+        self.max_length=max_length
+        self.model=model
     def save(self,path):
         self.word_database.save(path)
     def load(self,path):
@@ -19,7 +21,6 @@ class communicator:
         obj_features,
         failed_records,
     ):
-        # if vocab or failed_records:
         if vocab:
             word=run_gpt_prompt_speaker_generate(
                 len(self.letter_list),
@@ -27,49 +28,46 @@ class communicator:
                 vocab,
                 obj_features,
                 player_id=self.player_id,
-                failed_records=failed_records    
+                failed_records=failed_records,
+                max_length=self.max_length,
+                model=self.model    
             )["word"]
         else:
-            length=random.randint(2,6)
-            word="".join(random.choices(self.letter_list,k=length))
+            length=random.randint(1,self.max_length)
+            word="-".join(random.choices(self.letter_list,k=length))
         return word
     
     def listener_select(self,word,sf_dict:dict):
         word_exists=False
         try:
             word_nums=self.word_database.word_to_key_dict[word]
-            # weights=self.word_database.weight_output(word_nums,"listener")
-            # if weights==None:
-            #     raise KeyError
-            # for i in reversed(range(len(weights))):
-            #     if weights[i]<=0.1:
-            #         self.word_database.delete(word_nums[i])
-            #         word_nums.pop(i)
-            # weights=self.word_database.weight_output(word_nums,"listener")
-            # num=random.choices(word_nums,weights=weights,k=1)[0]
-            # num=random.choice(word_nums)
+            choice_list=[]
             for num in word_nums:
                 semantic_features=self.word_database.word_dict[num].toFeatures()
                 for key,value in sf_dict.items():
                     if value==semantic_features:
-                        word_exists=True
-                        self.word_database.word_dict[num].listen_fail_count-=1
-                        return word_exists,key,num
+                        choice_list.append((key,num))
+            if choice_list:
+                word_exists=True
+                pair=random.choice(choice_list)
+                return word_exists,pair[0],pair[1]
         except KeyError as e:
             pass
         except Exception as e:
             print("communicator: lister_select error:")
             print(e)
         if self.word_database.get_word_list():
-            # resembling_list=run_gpt_prompt_select_resembling_words(
-            #     letters_count=len(self.letter_list),
-            #     max_words=10,
-            #     letters_list=self.letter_list,
-            #     vocab=self.word_database.get_word_list(),
-            #     given_word=word,
-            #     player_id=self.player_id
-            # )
-            resembling_list=self.word_database.search_resembling_word(word)
+            resembling_list=run_gpt_prompt_select_resembling_words(
+                letters_count=len(self.letter_list),
+                max_words=10,
+                letters_list=self.letter_list,
+                vocab=self.word_database.get_word_list(),
+                given_word=word,
+                player_id=self.player_id,
+                model=self.model,
+            )['word_list']
+            # resembling_list=self.word_database.search_resembling_word(word)
+            # resembling_list=list(self.word_database.word_to_key_dict.keys())
             if resembling_list:
                 random.shuffle(resembling_list)
         else:
@@ -85,7 +83,8 @@ class communicator:
                 vocab_list,
                 word,
                 sf_dict,
-                player_id=self.player_id
+                player_id=self.player_id,
+                model=self.model
             )["option"]
         else:
             select_list=["A","B","C","D","E"]

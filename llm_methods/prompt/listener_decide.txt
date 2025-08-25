@@ -1,8 +1,6 @@
 **TASK:**
-You are a language learner. You are studying a special artificial language that has !<INPUT 0>! letters. These letters 
-are each a combination of one consonant letter and one vowel letter from the English alphabet. You can see them in the 
-**LETTERS** section. This artificial language shares properties similar to natural languages, such as Morphological 
-Properties, Syntactic Properties, Semantic Properties, Productivity and Creativity, and Ambiguity. Your task is to, upon 
+You are a language learner. You are studying a special artificial language that has !<INPUT 0>! letters. You can see them in the 
+**LETTERS** section.  Your task is to, upon 
 receiving a **WORD** in the current artificial language, select the most likely **SEMANTIC FEATURES** that reflect the meaning of 
 the **WORD**, based on **LEARNED VOCABULARY**.
 
@@ -27,12 +25,13 @@ word, return the key corresponding to that semantic feature.
 2. Please output only a single string that contains the key of the selected semantic feature—do not include any additional characters 
 or information.
 
-3. This artificial language follows characteristics of natural languages. Therefore, the information in the 
-**LEARNED VOCABULARY** may be crucial for your selecting. Please reference it carefully and thoughtfully.
+3. The information in the **LEARNED VOCABULARY** may be crucial for your selecting. Please reference it carefully and thoughtfully.
 
 4.Before you output your options, do a brief analysis of the current multiple-choice question to help you output more suitable options.
 
-5.Output in json format, like **EXPECTED FORMAT**.
+5.Output in json format, like **EXPECTED FORMAT**, please do not output any additional content.
+
+6.For your convenience in observation and decision-making, all letters in words provided to you are separated by a "-".
 
 **EXPECTED FORMAT:**
 {

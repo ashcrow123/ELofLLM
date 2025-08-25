@@ -1,10 +1,7 @@
 **TASK:**
-You are a language learner. You are studying a special artificial language that has !<INPUT 0>! letters. These letters 
-are each a combination of one consonant letter and one vowel letter from the English alphabet. You can see them in the 
-**LETTERS** section. This artificial language shares properties similar to natural languages, such as Morphological 
-Properties, Syntactic Properties, Semantic Properties, Productivity and Creativity, and Ambiguity. Your task is to 
-select up to !<INPUT 1>! words from your **LEARNED VOCABULARY** that share the same morphological form (i.e., may be 
-semantically related) as the **GIVEN WORD**.
+You are a language learner. You are studying a special artificial language that has !<INPUT 0>! letters.  You can see them in the 
+**LETTERS** section.  Your task is to 
+select words from your **LEARNED VOCABULARY** that share the same morphological form as the **GIVEN WORD**.
 
 **LETTERS:**
 !<INPUT 2>!
@@ -19,21 +16,16 @@ semantically related) as the **GIVEN WORD**.
 1. Please output the result strictly in JSON format as a list, where each element is a string representing a selected 
 word.
 
-2. This artificial language follows characteristics of natural languages. Therefore, the information in the 
-**LEARNED VOCABULARY** may be crucial for your selecting. Please reference it carefully and thoughtfully.
+2.The information in the **LEARNED VOCABULARY** may be crucial for your selecting. Please reference it carefully and thoughtfully.
 
-3.You must choose words that are similar in morphological form with strict standards The words you have chosen should 
-meet at least one of the following conditions:
+3.For your convenience in observation and decision-making, all letters in words provided to you are separated by a "-".
 
-*Has the same prefix as the **GIVEN WORD**
-*Has the same suffix as the **GIVEN WORD**
-*Has the same main body as the **GIVEN WORD**
-*Has same letter sequence at a similar position with **GIVEN WORD**
+4.There will be a numerical number before each word in **LEARNED VOCABULARY**. When you want to choose this word, simply give its serial number.
+
 
 **EXPECTED FORMAT:**
 
-[
-    <word_1 you selected>,
-    ...
-    <word n you selected>
-]
+{
+    "analysis":<Provide your analysis based on **LEARNED VOCABULARY** and **GIVEN WORD**>,
+    "num_list":<Give the numerical numbers of words that you believe have the same morphological form as the **GIVEN WORD**>
+}
