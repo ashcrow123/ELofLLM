@@ -13,6 +13,16 @@ def select_letters(num=10,seed=None):
     letters=random.sample(all_letters,k=num)
     random.seed(None)
     return letters
+def select_letters_vcv(num=10,seed=None):
+    random.seed(seed)
+    all_letters=[]
+    for i in "aeiou":
+        for j in "bcdfghjklmnpqrstvwxyz":
+            for k in "aeiou":
+                all_letters.append(i+j+k)
+    letters=random.sample(all_letters,k=num)
+    random.seed(None)
+    return letters
 
 #TODO 设置数据集
 class Referential_Game:
@@ -25,7 +35,8 @@ class Referential_Game:
         save_interval,
         obj_loader,
         max_length,
-        model_list
+        model_list,
+        option_num=5,
     ):
         self.name=name
         self.comm_num=comm_num
@@ -44,6 +55,7 @@ class Referential_Game:
         self.round=0
         self.obj_loader=obj_loader
         self.save_interval=save_interval
+        self.option_num=option_num
     def communicate(
                 self,
                 speaker_id:str,
@@ -64,7 +76,7 @@ class Referential_Game:
         obj_list=list(obj_features_dict.keys())
         select_features_dict=dict()
         choices_dict=dict()
-        choices="ABCDE"
+        choices="ABCDEFGHIJKLMNOPQIST"
         for i in range(len(obj_list)):
             choices_dict[choices[i]]=obj_list[i]
             select_features_dict[choices[i]]=obj_features_dict[obj_list[i]]
@@ -190,7 +202,7 @@ class Referential_Game:
             obj_list=list(obj_features_dict.keys())
             select_features_dict=dict()
             choices_dict=dict()
-            choices="ABCDE"
+            choices="ABCDEFGHIJKLMNOPQIST"
             for i in range(len(obj_list)):
                 choices_dict[choices[i]]=obj_list[i]
                 select_features_dict[choices[i]]=obj_features_dict[obj_list[i]]
@@ -273,7 +285,7 @@ class Referential_Game:
                 corr_obj=list(self.obj_loader.keys())[(self.round-1)%len(self.obj_loader)]
                 keys_list=list(self.obj_loader.keys())
                 keys_list.remove(corr_obj)
-                random_keys=random.sample(keys_list,k=4)
+                random_keys=random.sample(keys_list,k=self.option_num-1)
                 obj_dict={obj:self.obj_loader[obj] for obj in random_keys}
                 result=self.communicate(
                     speaker_id=pair[0],
@@ -300,7 +312,7 @@ class Referential_Game:
                 corr_obj=list(self.obj_loader.keys())[(self.round-1)%len(self.obj_loader)]
                 keys_list=list(self.obj_loader.keys())
                 keys_list.remove(corr_obj)
-                random_keys=random.sample(keys_list,k=4)
+                random_keys=random.sample(keys_list,k=self.option_num-1)
                 obj_dict={obj:self.obj_loader[obj] for obj in random_keys}
                 result=self.test_communicate(
                     speaker_id=pair[0],

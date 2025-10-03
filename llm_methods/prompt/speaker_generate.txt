@@ -1,7 +1,7 @@
 **TASK:**
 You are a language learner. You are studying a special artificial language that has !<INPUT 0>! letters. 
 You can see them in the **LETTERS** section. Your task is to generate a word to express **OBJECT PROPERTIES**, which will be sent 
-to your other language learner for he to guess the current **OBJECT PROPERTIES**. You will be given your own 
+to other language learner for him to guess the current **OBJECT PROPERTIES**. You will be given your own 
 **LEARNED VOCABULARY**, which can help you generate correct words. In addition, this is a multi round communication 
 process, and the **FAILED COMMUNICATION RECORDS** between you and your partner will be provided. 
 The **FAILED COMMUNICATION RECORDS** is a dictionary in JSON format, with the key being a word you have used before and the 

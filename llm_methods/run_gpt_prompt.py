@@ -431,7 +431,8 @@ def run_gpt_prompt_listener_decide(letters_count,
             if not option or not isinstance(option, str):
                 return False
             option=option.strip().upper()
-            if option in ["A","B","C","D","E"]:
+            options="ABCDEFGHIJKLMNOPQIST"
+            if option in options[:len(semantic_features)]:
                 return gpt_response  
             else:
                 return False       

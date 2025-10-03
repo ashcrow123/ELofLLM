@@ -33,7 +33,10 @@ class communicator:
                 model=self.model    
             )["word"]
         else:
-            length=random.randint(1,self.max_length)
+            if self.max_length==2:
+                length=random.randint(1,self.max_length)
+            else:
+                length=random.randint(2,self.max_length)
             word="-".join(random.choices(self.letter_list,k=length))
         return word
     
@@ -87,8 +90,8 @@ class communicator:
                 model=self.model
             )["option"]
         else:
-            select_list=["A","B","C","D","E"]
-            choice=random.choice(select_list)
+            choices="ABCDEFGHIJKLMNOPQIST"
+            choice=random.choice(choices[:len(sf_dict)])
         return word_exists,choice,None
         
         

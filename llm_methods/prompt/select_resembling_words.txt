@@ -1,7 +1,8 @@
 **TASK:**
-You are a language learner. You are studying a special artificial language that has !<INPUT 0>! letters.  You can see them in the 
-**LETTERS** section.  Your task is to 
-select words from your **LEARNED VOCABULARY** that share the same morphological form as the **GIVEN WORD**.
+    You are a language learner. You are studying a special artificial language that has !<INPUT 0>! letters.  You can see them in the 
+    **LETTERS** section.  
+    Your task is to select words from the **LEARNED VOCABULARY** that have  similarity in word form to the **GIVEN WORD**, 
+    so that you believe they have a semantic connection with the **GIVEN WORD**.
 
 **LETTERS:**
 !<INPUT 2>!
