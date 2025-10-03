@@ -69,8 +69,6 @@ class communicator:
                 player_id=self.player_id,
                 model=self.model,
             )['word_list']
-            # resembling_list=self.word_database.search_resembling_word(word)
-            # resembling_list=list(self.word_database.word_to_key_dict.keys())
             if resembling_list:
                 random.shuffle(resembling_list)
         else:

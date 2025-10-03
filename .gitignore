@@ -1,4 +1,3 @@
-data/
 output/
 test.py
 sim_storage
@@ -6,3 +5,7 @@ statistic
 image/
 __pycache__
 plot.py
+caption_game.py
+data/**
+!data/McRae-BRM-InPress/
+!data/McRae-BRM-InPress/**/*.xlsx

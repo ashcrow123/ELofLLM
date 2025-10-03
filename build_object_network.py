@@ -14,7 +14,10 @@ BR_labels=[
         "taste",
         "visual_colour",
         "visual_form_and_surface",
-        "visual_motion"
+        "visual_motion",
+        "function",
+        "encyclopaedic",
+        "taxonomic",
     ]
 for concept,features in copy_loader.items():
     for label in features:

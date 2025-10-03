@@ -7,15 +7,13 @@ import json
 import random
 
 def find_most_similar_word(target_word, candidate_words,k=1):
-        # 确保输入是二维数组（便于批量操作）
-        target = np.array(target_word).reshape(1, -1)  # 转为 (1, n)
-        candidates = np.array(candidate_words)         # 保持 (m, n)
+        target = np.array(target_word).reshape(1, -1)  
+        candidates = np.array(candidate_words)         
         
-        # 归一化（单位向量化）
         target_norm = target / np.linalg.norm(target, axis=1, keepdims=True)
         candidates_norm = candidates / np.linalg.norm(candidates, axis=1, keepdims=True)
         
-        # 计算余弦相似度（批量点积）
+        
         similarities = np.dot(candidates_norm, target_norm.T).flatten()
         if len(similarities)>=k:
             top_k_indices = np.argsort(similarities)[-k:][::-1]

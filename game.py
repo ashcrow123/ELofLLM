@@ -24,7 +24,6 @@ def select_letters_vcv(num=10,seed=None):
     random.seed(None)
     return letters
 
-#TODO 设置数据集
 class Referential_Game:
     def __init__(
         self,

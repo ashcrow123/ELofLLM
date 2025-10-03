@@ -55,21 +55,6 @@ def GPT_4o_request(prompt, gpt_parameter):
 
 def text_embedding_request(prompt, 
                            model="text-embedding-ada-002",):
-    # if type(prompt) is str:
-    #     response = client.embeddings.create(
-    #         model=model, 
-    #         input=[prompt],
-    #         )
-    #     embedding = response.data[0].embedding
-    # elif type(prompt) is list:
-    #     response = client.embeddings.create(
-    #         model=model, 
-    #         input=prompt,
-    #         )
-    #     embedding = [item.embedding for item in response.data]
-    # else:
-    #     raise ValueError("The input must be a string or a list.")
-    # return embedding
     return None
 
 def text_embedding_request_v2(prompt, 
