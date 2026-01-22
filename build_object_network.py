@@ -1,11 +1,15 @@
-from data_loader.BRM_loader import load_object_feature_pairs 
+from data_loader.BRM_loader import load_object_feature_pairs_v2
 from llm_methods.run_gpt_prompt import run_gpt_prompt_select_synonyms
 import json
 from tqdm import tqdm
 from copy import deepcopy
-import time
-model="gpt-4.1-mini"
-all_pairs=load_object_feature_pairs()
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--model", default="gpt-4.1-mini")
+args = parser.parse_args()
+
+model = args.model
+all_pairs=load_object_feature_pairs_v2()
 copy_loader=deepcopy(all_pairs)
 BR_labels=[
         "smell",
@@ -46,8 +50,8 @@ for word in tqdm(all_words):
     for num in num_list:
         results[word].append(words_list[num])
         results[words_list[num]].append(word)
-    
-with open(f"./data/{model}_network.json","w") as f:
+
+with open(f"./data/{model.replace('/', '-')}_network.json","w") as f:
     json.dump(results,f,indent=4)
 
 

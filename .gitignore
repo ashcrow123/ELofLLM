@@ -9,3 +9,15 @@ caption_game.py
 data/**
 !data/McRae-BRM-InPress/
 !data/McRae-BRM-InPress/**/*.xlsx
+main_1.py
+main_2.py
+main_3.py  
+main_4.py
+main_5.py
+test_1.py
+test_2.py
+test_3.py
+test.ipynb
+exp_result.txt
+random_baseline/
+.vscode/

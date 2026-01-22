@@ -5,7 +5,6 @@ from llm_methods.gpt_structure import text_embedding_request
 from llm_methods.run_gpt_prompt import run_gpt_prompt_select_feature
 import json
 import random
-
 def find_most_similar_word(target_word, candidate_words,k=1):
         target = np.array(target_word).reshape(1, -1)  
         candidates = np.array(candidate_words)         
@@ -135,8 +134,82 @@ def load_object_feature_pairs(seed=None,count=None):
             random_pairs[key]=pairs[key]
         pairs=random_pairs
         random.seed(None)
+    return pairs
+
+def load_object_feature_pairs_v2(seed=None,count=None)->dict:
+    pairs=dict()
+    path="./data/McRae-BRM-InPress/CONCS_FEATS_concstats_brm.xlsx"
+    df=pd.read_excel(path)
+    # df=df.dropna()
+    df['Feature'] = df['Feature'].str.replace('_', ' ')
+    df['BR_Label'] = df['BR_Label'].str.replace('-', '_')
+    df['Feature'] = df['Feature'].str.replace(r'^beh - ', 'living behavior: ', regex=True)
+    df['Feature'] = df['Feature'].str.replace(r'^inbeh - ', 'non-living behavior: ', regex=True)
+    groups=df.groupby("Concept")
+    for concept,group in groups:
+        pairs[concept]={
+            'encyclopaedic':[],
+            'function':[],
+            'smell':[],
+            'sound':[],
+            'tactile':[],
+            'taste':[],
+            'taxonomic':[],
+            'visual_colour':[],
+            'visual_form_and_surface':[],
+            'visual_motion':[]
+            }
+        # 先按特征类别分组，为每个类别找到Prod_Freq最大的特征
+        feature_groups = group.groupby("BR_Label")
+        for category, category_group in feature_groups:
+            # 检查该类别是否在pairs的键中
+            if category in pairs[concept]:
+                # 如果该类别组不为空
+                if not category_group.empty:
+                    # 找到Prod_Freq最大的行
+                    max_freq_row = category_group.loc[category_group['Prod_Freq'].idxmax()]
+                    # 只添加该特征
+                    pairs[concept][category].append(max_freq_row["Feature"])
+    if seed and count:
+        random_pairs=dict()
+        random.seed(seed)
+        keys=random.sample(list(pairs.keys()),k=count)
+        for key in keys:
+            random_pairs[key]=pairs[key]
+        pairs=random_pairs
+        random.seed(None)
     return pairs   
 
+def get_splited_data_wo_feature(count,attr,feature,seed=None):
+    '''
+    指定attr,feature,将拥有该属性特征的对象划分到测试集，其他对象抽样划分训练集。
+    '''
+    all_pairs=load_object_feature_pairs_v2()
+    test_pairs=dict()
+    train_pairs=dict()
+    del_concepts=[]
+    for concept,features in all_pairs.items():
+        if features[attr] and features[attr][0]==feature:
+            test_pairs[concept]=features
+            del_concepts.append(concept)
+    for concept in del_concepts:
+        del all_pairs[concept]
+    random.seed(seed)
+    keys=random.sample(list(all_pairs.keys()),k=count)
+    for key in keys:
+        train_pairs[key]=all_pairs[key]
+    random.seed(None)
+    return train_pairs,test_pairs
+
+def get_splited_data(count,seed=None):
+    train_pairs=load_object_feature_pairs_v2(seed=seed,count=count)
+    all_pairs=load_object_feature_pairs_v2()
+    test_pairs=dict()
+    for concept in all_pairs.keys():
+        if concept not in train_pairs:
+            test_pairs[concept]=all_pairs[concept]
+    return train_pairs,test_pairs
+    
 if __name__ == "__main__":
     pass
     

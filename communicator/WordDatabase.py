@@ -11,26 +11,6 @@ def split_cv_blocks(word):
     blocks=word.split("-")
     return blocks
 
-def edit_distance_cv_blocks(blocks1, blocks2):
-    """Given two block sequences, calculate their edit distance"""
-    m, n = len(blocks1), len(blocks2)
-    dp = [[0] * (n + 1) for _ in range(m + 1)]
-
-    for i in range(m + 1):
-        dp[i][0] = i
-    for j in range(n + 1):
-        dp[0][j] = j
-
-    for i in range(1, m + 1):
-        for j in range(1, n + 1):
-            cost = 0 if blocks1[i - 1] == blocks2[j - 1] else 1
-            dp[i][j] = min(
-                dp[i - 1][j] + 1,
-                dp[i][j - 1] + 1,
-                dp[i - 1][j - 1] + cost
-            )
-    return dp[m][n]
-
 def Jaccard_similarity(blocks_1, blocks_2, n):
     def n_grams(blocks, n):
         """generate n-gram"""
@@ -40,15 +20,6 @@ def Jaccard_similarity(blocks_1, blocks_2, n):
     intersection = len(set1.intersection(set2))
     union = len(set1.union(set2))
     return intersection / union if union != 0 else 0.0
-
-def get_Intersection(lists):
-    # Compute the intersection of multiple lists
-    if not lists:
-        return []
-    intersection = set(lists[0])
-    for lst in lists[1:]:
-        intersection.intersection_update(lst)
-    return list(intersection)
 
 
 class Word:
@@ -139,7 +110,7 @@ class WordDatabase:
         self.word_dict=dict()
         self.word_to_key_dict=dict()
         self.obj_dict=dict()
-        with open(f"data/{model}_network.json","r") as f:
+        with open(f"data/{model.replace('/','-')}_network.json","r") as f:
             self.synonyms_search_dict=json.load(f)
     def add_word(self,
                 text_embedding,
@@ -199,8 +170,7 @@ class WordDatabase:
             self.obj_dict[obj].append(new_num)
         except:
             self.obj_dict[obj]=[new_num]
-        
-          
+           
         return
     def change_word(self,num,word):
         num=str(num)
