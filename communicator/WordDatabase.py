@@ -110,8 +110,8 @@ class WordDatabase:
         self.word_dict=dict()
         self.word_to_key_dict=dict()
         self.obj_dict=dict()
-        with open(f"data/{model.replace('/','-')}_network.json","r") as f:
-            self.synonyms_search_dict=json.load(f)
+        # with open(f"data/{model.replace('/','-')}_network.json","r") as f:
+        #     self.synonyms_search_dict=json.load(f)
     def add_word(self,
                 text_embedding,
                 word: str,

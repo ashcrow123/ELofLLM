@@ -14,7 +14,19 @@ class communicator:
         self.word_database.save(path)
     def load(self,path):
         self.word_database.load(path)  
-        print(f"player_{self.player_id} has loaded word database.")  
+        print(f"player_{self.player_id} has loaded word database.")
+    def select_near_synonyms(self,object_features):
+        word_num_list=[key for key in self.word_database.word_dict.keys()]
+        features_list=[word.toFeatures() for word in self.word_database.word_dict.values()]
+        output=run_gpt_prompt_select_synonyms(object_features=object_features,
+                                          features_list=features_list,
+                                          model=self.model,
+                                          )
+        num_list=output["num_list"]
+        synonyms_num=[word_num_list[num] for num in num_list]
+        synonyms=[self.word_database.word_dict[num].todict_wo_object() for num in synonyms_num]
+        return synonyms
+
     def generate_new_word(
         self,                   
         vocab,

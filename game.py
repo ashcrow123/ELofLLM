@@ -126,7 +126,8 @@ class Referential_Game:
         speaker_known_vocab_num=speaker.word_database.search_word(**obj_features_dict[corr_obj])
         random.shuffle(speaker_known_vocab_num)
         speaker_known_vocab=[speaker.word_database.word_dict[num].word for num in speaker_known_vocab_num]
-        speaker_near_synonyms=[speaker.word_database.word_dict[num].todict_wo_object() for num in speaker.word_database.search_near_synonyms(corr_obj)]
+        # speaker_near_synonyms=[speaker.word_database.word_dict[num].todict_wo_object() for num in speaker.word_database.search_near_synonyms(corr_obj)]
+        speaker_near_synonyms=speaker.select_near_synonyms(object_features=obj_features_dict[corr_obj]) if speaker.word_database.word_dict else []
         speaker_short_memory=[]
         speaker_used_num=speaker_known_vocab_num[0] if speaker_known_vocab_num else None
 
