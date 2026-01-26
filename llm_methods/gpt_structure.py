@@ -5,20 +5,101 @@ import tiktoken
 import openai
 import numpy as np
 import base64
+from vllm import LLM,SamplingParams
 openai_api_key=os.environ.get("OPENAI_API_KEY")
 api_base = os.environ.get("OPENAI_API_BASE")
+class LocalOpenAIClient:
+    def __init__(self, model_path, tensor_parallel_size=1):
+        self.llm = LLM(
+            model=model_path,
+            tensor_parallel_size=tensor_parallel_size,
+            trust_remote_code=True,
+            max_model_len=32000,
+        )
 
-client = openai.OpenAI(
-    api_key=openai_api_key, 
-    base_url=api_base
-    )
+        self.chat = self.Chat(self)
 
+    class Chat:
+        def __init__(self, outer):
+            self.completions = outer.Completions(outer)
+
+    class Completions:
+        def __init__(self, outer):
+            self.outer = outer
+
+        def create(
+            self,
+            model,
+            messages,
+            max_tokens,
+            temperature,
+            top_p,
+            frequency_penalty=0,
+            presence_penalty=0,
+        ):
+            # 1. messages → prompt
+            prompt = self._messages_to_prompt(messages)
+
+            # 2. 构造 sampling params
+            params = SamplingParams(
+                temperature=temperature,
+                top_p=top_p,
+                max_tokens=max_tokens,
+            )
+
+            # 3. 调用 vLLM
+            outputs = self.outer.llm.generate([prompt], params)
+
+            text = outputs[0].outputs[0].text
+
+            # 4. 构造 OpenAI 风格返回
+            return type(
+                "Completion",
+                (),
+                {
+                    "choices": [
+                        type(
+                            "Choice",
+                            (),
+                            {
+                                "message": type(
+                                    "Message",
+                                    (),
+                                    {"content": text},
+                                )()
+                            },
+                        )
+                    ]
+                },
+            )
+
+        def _messages_to_prompt(self, messages):
+            prompt = ""
+            for m in messages:
+                role = m["role"]
+                content = m["content"]
+                if role == "system":
+                    prompt += f"[SYSTEM]\n{content}\n"
+                elif role == "user":
+                    prompt += f"[USER]\n{content}\n"
+                elif role == "assistant":
+                    prompt += f"[ASSISTANT]\n{content}\n"
+            prompt += "[ASSISTANT]\n"
+            return prompt
+# client = openai.OpenAI(
+#     api_key=openai_api_key, 
+#     base_url=api_base  
+#     )
+client = LocalOpenAIClient(
+    model_path="model/Qwen3-4B",
+    tensor_parallel_size=4
+)
 
 def temp_sleep(seconds=0.1):
     time.sleep(seconds)
 
 
-def GPT_4o_request(prompt, gpt_parameter):
+def GPT_request(prompt, gpt_parameter):
     """
     Given a prompt and a dictionary of GPT parameters, make a request to OpenAI
     server and returns the response.
@@ -88,7 +169,7 @@ def safe_generate_response(
         print(prompt)
 
     for i in range(repeat):
-        curr_gpt_response = GPT_4o_request(prompt, gpt_parameter)
+        curr_gpt_response = GPT_request(prompt, gpt_parameter)
         if func_validate(curr_gpt_response, prompt=prompt):
             return func_clean_up(curr_gpt_response, prompt=prompt)
         if verbose:

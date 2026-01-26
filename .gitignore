@@ -21,3 +21,4 @@ test.ipynb
 exp_result.txt
 random_baseline/
 .vscode/
+model/
