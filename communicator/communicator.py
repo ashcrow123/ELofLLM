@@ -60,7 +60,7 @@ class communicator:
             print("communicator: lister_select error:")
             print(e)
         if self.word_database.get_word_list():
-            resembling_list=run_gpt_prompt_select_resembling_words(
+            resembling_list=run_gpt_prompt_listener_retrieval(
                 letters_count=len(self.letter_list),
                 max_words=10,
                 letters_list=self.letter_list,
@@ -78,7 +78,7 @@ class communicator:
             for resem_word in resembling_list:
                 word_num_list+=self.word_database.word_to_key_dict[resem_word]
             vocab_list=[self.word_database.word_dict[num].todict_wo_object() for num in word_num_list]
-            choice=run_gpt_prompt_listener_decide(
+            choice=run_gpt_prompt_listener_selection(
                 len(self.letter_list),
                 self.letter_list,
                 vocab_list,

@@ -1,7 +1,6 @@
 from llm_methods.gpt_structure import *
 def deal_json_format(text):
     text=text.replace("**EXPECTED FORMAT:**","")
-    text="{"+text.split("{")[-1]
     text=text.replace('json',"")
     text=text.replace('`','')
     text=text.strip()
@@ -285,7 +284,7 @@ def run_gpt_prompt_speaker_generate(letters_count,
     
     return output
 
-def run_gpt_prompt_select_resembling_words(letters_count,
+def run_gpt_prompt_listener_retrieval(letters_count,
                               max_words,
                               letters_list,
                               vocab,
@@ -293,7 +292,7 @@ def run_gpt_prompt_select_resembling_words(letters_count,
                               player_id,
                               model,
                               verbose=True):
-    prompt_template="prompt/select_resembling_words.txt"
+    prompt_template="prompt/listner_retrieval.txt"
     def create_prompt(letters_count,
                       max_words,
                       letters_list,
@@ -384,7 +383,7 @@ def run_gpt_prompt_select_resembling_words(letters_count,
     
     return output
 
-def run_gpt_prompt_listener_decide(letters_count,
+def run_gpt_prompt_listener_selection(letters_count,
                               letters_list,
                               vocab,
                               given_word,
@@ -392,7 +391,7 @@ def run_gpt_prompt_listener_decide(letters_count,
                               player_id,
                               model,
                               verbose=True):
-    prompt_template="prompt/listener_decide.txt"
+    prompt_template="prompt/listener_selection.txt"
     def create_prompt(letters_count,
                       letters_list,
                       vocab,
@@ -559,12 +558,12 @@ def run_gpt_prompt_select_feature(word,
     
     return output
 
-def run_gpt_prompt_select_synonyms(
+def run_gpt_prompt_speaker_retrieval(
                               object_features,
                               features_list:list,
                               model,
                               verbose=True):
-    prompt_template="prompt/select_synonyms.txt"
+    prompt_template="prompt/speaker_retrieval.txt"
     def create_prompt(
                       object_features:dict,
                       features_list:list,

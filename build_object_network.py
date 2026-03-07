@@ -1,5 +1,5 @@
 from data_loader.BRM_loader import load_object_feature_pairs_v2
-from llm_methods.run_gpt_prompt import run_gpt_prompt_select_synonyms
+from llm_methods.run_gpt_prompt import run_gpt_prompt_speaker_retrieval
 import json
 from tqdm import tqdm
 from copy import deepcopy
@@ -41,7 +41,7 @@ for word in tqdm(all_words):
         break
     features_list=list(all_pairs.values())
     words_list=list(all_pairs.keys())
-    output=run_gpt_prompt_select_synonyms(object_features=object_features,
+    output=run_gpt_prompt_speaker_retrieval(object_features=object_features,
                                           features_list=features_list,
                                           model=model,
                                           verbose=False)

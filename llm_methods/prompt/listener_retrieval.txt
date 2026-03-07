@@ -1,7 +1,7 @@
 **TASK:**
     You are a language learner. You are studying a special artificial language that has !<INPUT 0>! letters.  You can see them in the 
     **LETTERS** section.  
-    Your task is to select words from the **LEARNED VOCABULARY** that you believe they have a semantic connection with the **GIVEN WORD**.
+    Your task is to select words from the **LEARNED VOCABULARY** that you think are similar in meaning or closely related to the **GIVEN WORD**.
 
 **LETTERS:**
 !<INPUT 2>!
