@@ -1,11 +1,12 @@
-from communicator.WordDatabase import WordDatabase
+from WordDatabase import WordDatabase
 from llm_methods.gpt_structure import text_embedding_request
 from llm_methods.run_gpt_prompt import *
 import random
-from typing import Protocol,List
+from typing import Protocol,runtime_checkable
 
+@runtime_checkable
 class communicator(Protocol):
-    id:int|str
+    player_id:int|str
     max_length:int
     model:str
     def save(self,path):
@@ -22,7 +23,7 @@ class communicator(Protocol):
     def listener_select(self,word,sf_dict:dict):
         ...
 
-class communicator:
+class communicator_of_EL:
     def __init__(self,letter_list,id,max_length,model):
         self.letter_list=letter_list
         self.word_database=WordDatabase(model=model)
@@ -50,7 +51,7 @@ class communicator:
                 failed_records=failed_records,
                 max_length=self.max_length,
                 model=self.model    
-            )["word"]
+            ).word
         else:
             if self.max_length==2:
                 length=random.randint(1,self.max_length)
@@ -87,7 +88,7 @@ class communicator:
                 given_word=word,
                 player_id=self.player_id,
                 model=self.model,
-            )['word_list']
+            ).word_list
             if resembling_list:
                 random.shuffle(resembling_list)
         else:
@@ -105,10 +106,9 @@ class communicator:
                 sf_dict,
                 player_id=self.player_id,
                 model=self.model
-            )["option"]
+            ).option
         else:
             choices="ABCDEFGHIJKLMNOPQIST"
             choice=random.choice(choices[:len(sf_dict)])
         return word_exists,choice,None
-        
         

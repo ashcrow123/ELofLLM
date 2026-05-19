@@ -1,25 +1,44 @@
 import json
 import time
 import os
+import inspect
 import tiktoken
 import openai
 import numpy as np
 import base64
+from dataclasses import dataclass
+from functools import wraps
 from dotenv import load_dotenv
+from pydantic import BaseModel, ValidationError
 load_dotenv(override=True)
 openai_api_key=os.environ.get("OPENAI_API_KEY")
 api_base = os.environ.get("OPENAI_API_BASE")
 client = openai.OpenAI(
-    api_key=openai_api_key, 
+    api_key=openai_api_key,
     base_url=api_base
     )
+
+async_client = openai.AsyncOpenAI(
+    api_key=openai_api_key,
+    base_url=api_base
+    )
+
+
+@dataclass
+class GPTPromptConfig:
+    model: str = "gpt-4o-mini"
+    max_tokens: int = 4096
+    top_p: float = 1.0
+    frequency_penalty: float = 0.0
+    presence_penalty: float = 0.0
+    temperature: float = 0.1
 
 
 def temp_sleep(seconds=0.1):
     time.sleep(seconds)
 
 
-def GPT_4o_request(prompt, gpt_parameter):
+def LLM_request(prompt, gpt_parameter):
     """
     Given a prompt and a dictionary of GPT parameters, make a request to OpenAI
     server and returns the response.
@@ -54,7 +73,44 @@ def GPT_4o_request(prompt, gpt_parameter):
         print("Exception: ", e)
         return "Error"
 
-def text_embedding_request(prompt, 
+
+async def LLM_request_async(prompt, gpt_parameter):
+    """
+    Given a prompt and a dictionary of GPT parameters, make a request to OpenAI
+    server and returns the response.
+    ARGS:
+      prompt: a str prompt
+      gpt_parameter: a python dictionary with the keys indicating the names of
+                     the parameter and the values indicating the parameter
+                     values.
+    RETURNS:
+      a str of GPT-4o-mini's response.
+    """
+    temp_sleep()
+    try:
+        if type(prompt) is dict:
+            msg = [
+                {"role": "system", "content": prompt["system"]},
+                {"role": "user", "content": prompt["user"]},
+            ]
+        else:
+            msg = [{"role": "user", "content": prompt}]
+        completion = await async_client.chat.completions.create(
+            model=gpt_parameter["model"],
+            messages=msg,
+            max_tokens=gpt_parameter["max_tokens"],
+            top_p=gpt_parameter["top_p"],
+            frequency_penalty=gpt_parameter["frequency_penalty"],
+            presence_penalty=gpt_parameter["presence_penalty"],
+            temperature=gpt_parameter["temperature"],
+        )
+        return completion.choices[0].message.content
+    except Exception as e:
+        print("Exception: ", e)
+        return "Error"
+
+
+def text_embedding_request(prompt,
                            model="text-embedding-ada-002",):
     return None
 
@@ -76,32 +132,121 @@ def text_embedding_request_v2(prompt,
         raise ValueError("The input must be a string or a list.")
     return embedding   
   
-def safe_generate_response(
-    prompt,
-    gpt_parameter,
-    repeat=5,
-    fail_safe_response="error",
-    func_validate=None,
-    func_clean_up=None,
-    verbose=False,
-):
-    if verbose:
-        print(prompt)
+def deal_json_format(text):
+    text = text.replace("**EXPECTED FORMAT:**", "")
+    text = text.replace('json', "")
+    text = text.replace('`', '')
+    text = text.strip()
+    return text
 
+
+def _run_retry_loop(result, gpt_parameter, repeat, response_model, verbose):
+    prompt = result.pop("prompt")
+    prompt_template = result.pop("prompt_template", None)
+    if "model" in result:
+        gpt_parameter = {**gpt_parameter, "model": result.pop("model")}
+    context = result
+
+    curr_gpt_response = None
     for i in range(repeat):
-        curr_gpt_response = GPT_4o_request(prompt, gpt_parameter)
-        if func_validate(curr_gpt_response, prompt=prompt):
-            return func_clean_up(curr_gpt_response, prompt=prompt)
-        if verbose:
-            print("---- repeat count: ", i, curr_gpt_response)
-            print(curr_gpt_response)
-            print("~~~~")
-    if curr_gpt_response == "Error":
-        raise ValueError(
-            "The GPT server is not responding. Please check your internet connection or the server status."
-        )
-    
-    raise ValueError(fail_safe_response + f"The output is:\n {curr_gpt_response}")
+        curr_gpt_response = LLM_request(prompt, gpt_parameter)
+        try:
+            parsed = json.loads(deal_json_format(curr_gpt_response))
+            if isinstance(parsed, list):
+                parsed = {"data": parsed}
+            merged = {**context, **parsed}
+            validated = response_model.model_validate(merged)
+            if verbose:
+                print_run_prompts(
+                    prompt_template=prompt_template,
+                    player_id=context.get("player_id"),
+                    prompt=prompt,
+                    output=validated,
+                )
+            return validated
+        except (json.JSONDecodeError, ValidationError):
+            if verbose:
+                print("---- repeat count: ", i, curr_gpt_response)
+                print(curr_gpt_response)
+                print("~~~~")
+
+    raise ValueError(
+        "Error:The output of GPT is illegal. The output is:\n " + str(curr_gpt_response)
+    )
+
+
+async def _run_retry_loop_async(result, gpt_parameter, repeat, response_model, verbose):
+    prompt = result.pop("prompt")
+    prompt_template = result.pop("prompt_template", None)
+    if "model" in result:
+        gpt_parameter = {**gpt_parameter, "model": result.pop("model")}
+    context = result
+
+    curr_gpt_response = None
+    for i in range(repeat):
+        curr_gpt_response = await LLM_request_async(prompt, gpt_parameter)
+        try:
+            parsed = json.loads(deal_json_format(curr_gpt_response))
+            if isinstance(parsed, list):
+                parsed = {"data": parsed}
+            merged = {**context, **parsed}
+            validated = response_model.model_validate(merged)
+            if verbose:
+                print_run_prompts(
+                    prompt_template=prompt_template,
+                    player_id=context.get("player_id"),
+                    prompt=prompt,
+                    output=validated,
+                )
+            return validated
+        except (json.JSONDecodeError, ValidationError):
+            if verbose:
+                print("---- repeat count: ", i, curr_gpt_response)
+                print(curr_gpt_response)
+                print("~~~~")
+
+    raise ValueError(
+        "Error:The output of GPT is illegal. The output is:\n " + str(curr_gpt_response)
+    )
+
+
+def safe_generate_response(
+    response_model: type[BaseModel],
+    repeat: int = 5,
+    gpt_param: GPTPromptConfig | None = None,
+):
+    if gpt_param is None:
+        gpt_param = GPTPromptConfig()
+
+    gpt_parameter = {
+        "model": gpt_param.model,
+        "max_tokens": gpt_param.max_tokens,
+        "top_p": gpt_param.top_p,
+        "frequency_penalty": gpt_param.frequency_penalty,
+        "presence_penalty": gpt_param.presence_penalty,
+        "temperature": gpt_param.temperature,
+    }
+
+    def decorator(func):
+        if inspect.iscoroutinefunction(func):
+            @wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                result = await func(*args, **kwargs)
+                return await _run_retry_loop_async(
+                    result, gpt_parameter, repeat, response_model,
+                    kwargs.get("verbose", True)
+                )
+            return async_wrapper
+        else:
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                result = func(*args, **kwargs)
+                return _run_retry_loop(
+                    result, gpt_parameter, repeat, response_model,
+                    kwargs.get("verbose", True)
+                )
+            return wrapper
+    return decorator
 
 
 def generate_prompt_role_play(curr_input, prompt_lib_file):

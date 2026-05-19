@@ -93,7 +93,7 @@ class BRM_loader:
     def generate_features(self,word):
         features=dict()
         text_embedding=text_embedding_request(word)
-        feature_select=run_gpt_prompt_select_feature(word)
+        feature_select=run_gpt_prompt_select_feature(word).data
         for tp,embeddings in self.text_embedding.items():
             if tp in feature_select:
                 top_k_id,_=find_most_similar_word(text_embedding, embeddings,k=1)

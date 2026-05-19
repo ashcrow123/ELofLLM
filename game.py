@@ -1,4 +1,4 @@
-from communicator.communicator import communicator
+from communicator.communicator import communicator_of_EL
 from llm_methods.gpt_structure import text_embedding_request
 from data_loader.BRM_loader import BRM_loader,load_object_feature_pairs
 import random
@@ -76,7 +76,7 @@ class Referential_Game:
         self.model_list=model_list
         self.players=dict()
         for i in range(player_num):
-            self.players[str(i)]=communicator(self.letter_list,id=str(i),max_length=self.max_length,model=self.model_list[i])
+            self.players[str(i)]=communicator_of_EL(self.letter_list,id=str(i),max_length=self.max_length,model=self.model_list[i])
         self.round=0
         self.obj_loader=obj_loader
         self.save_interval=save_interval
