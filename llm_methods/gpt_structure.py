@@ -5,9 +5,10 @@ import tiktoken
 import openai
 import numpy as np
 import base64
+from dotenv import load_dotenv
+load_dotenv(override=True)
 openai_api_key=os.environ.get("OPENAI_API_KEY")
 api_base = os.environ.get("OPENAI_API_BASE")
-
 client = openai.OpenAI(
     api_key=openai_api_key, 
     base_url=api_base

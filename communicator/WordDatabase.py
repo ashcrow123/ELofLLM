@@ -6,30 +6,12 @@ import os
 import warnings
 import random
 import time
+from dataclasses import dataclass,asdict
+from typing import List, Dict, Any
 def split_cv_blocks(word):
     """Split words into consonant + vowel chunks"""
     blocks=word.split("-")
     return blocks
-
-def edit_distance_cv_blocks(blocks1, blocks2):
-    """Given two block sequences, calculate their edit distance"""
-    m, n = len(blocks1), len(blocks2)
-    dp = [[0] * (n + 1) for _ in range(m + 1)]
-
-    for i in range(m + 1):
-        dp[i][0] = i
-    for j in range(n + 1):
-        dp[0][j] = j
-
-    for i in range(1, m + 1):
-        for j in range(1, n + 1):
-            cost = 0 if blocks1[i - 1] == blocks2[j - 1] else 1
-            dp[i][j] = min(
-                dp[i - 1][j] + 1,
-                dp[i][j - 1] + 1,
-                dp[i - 1][j - 1] + cost
-            )
-    return dp[m][n]
 
 def Jaccard_similarity(blocks_1, blocks_2, n):
     def n_grams(blocks, n):
@@ -41,47 +23,22 @@ def Jaccard_similarity(blocks_1, blocks_2, n):
     union = len(set1.union(set2))
     return intersection / union if union != 0 else 0.0
 
-def get_Intersection(lists):
-    # Compute the intersection of multiple lists
-    if not lists:
-        return []
-    intersection = set(lists[0])
-    for lst in lists[1:]:
-        intersection.intersection_update(lst)
-    return list(intersection)
-
-
+@dataclass
 class Word:
-    def __init__(self,
-                 obj:str, 
-                 word: str,
-                 speak_fail_count=0,
-                 listen_fail_count=0,
-                 encyclopaedic=[],
-                 function=[],
-                 smell=[],
-                 sound=[],
-                 tactile=[],
-                 taste=[],
-                 taxonomic=[],
-                 visual_colour=[],
-                 visual_form_and_surface=[],
-                 visual_motion=[]):
-        
-        self.obj = obj
-        self.word = word
-        self.encyclopaedic = encyclopaedic
-        self.function = function
-        self.smell = smell
-        self.sound = sound
-        self.tactile = tactile
-        self.taste = taste
-        self.taxonomic = taxonomic
-        self.visual_colour = visual_colour
-        self.visual_form_and_surface = visual_form_and_surface
-        self.visual_motion = visual_motion
-        self.speak_fail_count=speak_fail_count
-        self.listen_fail_count=listen_fail_count
+    obj:str
+    word:str
+    encyclopaedic :List[str]
+    function :List[str]
+    smell :List[str]
+    sound :List[str]
+    tactile :List[str]
+    taste :List[str]
+    taxonomic :List[str]
+    visual_colour :List[str]
+    visual_form_and_surface :List[str]
+    visual_motion :List[str]
+    speak_fail_count:int=0
+    listen_fail_count:int=0
     def todict(self):
         return {
             "obj": self.obj,
@@ -139,7 +96,7 @@ class WordDatabase:
         self.word_dict=dict()
         self.word_to_key_dict=dict()
         self.obj_dict=dict()
-        with open(f"data/{model}_network.json","r") as f:
+        with open(f"data/{model.replace('/','-')}_network.json","r") as f:
             self.synonyms_search_dict=json.load(f)
     def add_word(self,
                 text_embedding,
@@ -199,8 +156,7 @@ class WordDatabase:
             self.obj_dict[obj].append(new_num)
         except:
             self.obj_dict[obj]=[new_num]
-        
-          
+           
         return
     def change_word(self,num,word):
         num=str(num)

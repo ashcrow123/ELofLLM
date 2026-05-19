@@ -4,6 +4,18 @@ from data_loader.BRM_loader import BRM_loader,load_object_feature_pairs
 import random
 import os
 import json
+from tqdm import tqdm
+from dataclasses import dataclass,asdict
+@dataclass
+class gameconfig:
+    name:str
+    player_num:int
+    letter_list:list
+    comm_num:int
+    model_list:list
+    max_length:int
+    option_num:int
+
 def select_letters(num=10,seed=None):
     random.seed(seed)
     all_letters=[]
@@ -23,6 +35,21 @@ def select_letters_vcv(num=10,seed=None):
     letters=random.sample(all_letters,k=num)
     random.seed(None)
     return letters
+def select_letters_num(num=10,seed=None):
+    letters=[]
+    for i in range(1,num+1):
+        letters.append(f"({i})")
+    return letters
+def select_letters_nl(num=10,seed=None):
+    random.seed(seed)
+    all_letters=[]
+    for i in "0123456789":
+        for j in "abcdefghijklmnopqrstuvwxyz":
+            all_letters.append(f"{i}{j}")
+    letters=random.sample(all_letters,k=num)
+    random.seed(None)
+    return letters
+
 
 class Referential_Game:
     def __init__(
@@ -41,7 +68,6 @@ class Referential_Game:
         self.comm_num=comm_num
         if player_num<2 or player_num%2!=0:
             raise ValueError("The number of players must be an even number and greater than 1.")
-        os.makedirs(f"./sim_storage/{self.name}",exist_ok=True)
         self.features_loader=BRM_loader()
         self.features_loader.load_embedding("BRM")
         self.max_length=max_length
@@ -55,6 +81,24 @@ class Referential_Game:
         self.obj_loader=obj_loader
         self.save_interval=save_interval
         self.option_num=option_num
+        config=gameconfig(name=name,
+                               player_num=player_num,
+                               letter_list=letter_list,
+                               comm_num=comm_num,
+                               model_list=model_list,
+                               max_length=max_length,
+                               option_num=option_num,
+                               )
+        os.makedirs(f"./sim_storage/{self.name}",exist_ok=True)
+        if not os.path.exists(f"./sim_storage/{self.name}/game_config.json"):
+            with open(f"./sim_storage/{self.name}/game_config.json","w") as f:
+                json.dump(asdict(config),f,indent=4)
+        else:
+            with open(f"./sim_storage/{self.name}/game_config.json","r") as f:
+                old_config=gameconfig(**json.load(f))
+            if old_config!=asdict(config):
+                raise ValueError("The game configuration is inconsistent with the historical configuration.")
+        del config
     def communicate(
                 self,
                 speaker_id:str,
@@ -83,10 +127,9 @@ class Referential_Game:
         random.shuffle(speaker_known_vocab_num)
         speaker_known_vocab=[speaker.word_database.word_dict[num].word for num in speaker_known_vocab_num]
         speaker_near_synonyms=[speaker.word_database.word_dict[num].todict_wo_object() for num in speaker.word_database.search_near_synonyms(corr_obj)]
-        # speaker_near_synonyms=[speaker.word_database.word_dict[num].todict_wo_object() for num in speaker.word_database.word_dict]
         speaker_short_memory=[]
         speaker_used_num=speaker_known_vocab_num[0] if speaker_known_vocab_num else None
-        # speaker_known_vocab_num=[]
+
         while True: 
             round+=1
             if round<=self.comm_num:
@@ -270,7 +313,7 @@ class Referential_Game:
         
     def run(self,rounds):
         save_flag=0
-        for _ in range(rounds):
+        for _ in tqdm(range(rounds)):
             save_flag+=1
             results=[]
             self.round+=1
@@ -298,7 +341,7 @@ class Referential_Game:
                 self.save(results,False)
                 
     def test_run(self,rounds):
-        for _ in range(rounds):
+        for _ in tqdm(range(rounds)):
             results=[]
             self.round+=1
             player_ids=[str(i) for i in range(self.player_num)]
@@ -355,76 +398,7 @@ class Referential_Game:
         
 
                                       
-class Referential_Game_wo_commu(Referential_Game):
-    def __init__(self, name, player_num, letter_list, comm_num, save_interval, obj_loader, model_list):
-        super().__init__(name, player_num, letter_list, comm_num, save_interval, obj_loader, model_list)
-    def output(
-        self,
-        speaker_id:str,
-        listener_id:str,
-    ):
-        speaker=self.players[speaker_id]
-        listener=self.players[listener_id]
-        word_list=[]
-        corr_obj=list(self.obj_loader.keys())[(self.round-1)%len(self.obj_loader.keys())]
-        corr_obj_features=self.obj_loader[corr_obj]
-        corr_obj_embedding=text_embedding_request(corr_obj)
-        speaker_known_vocab_num=speaker.word_database.search_word(**corr_obj_features)
-        random.shuffle(speaker_known_vocab_num)
-        speaker_known_vocab=[speaker.word_database.word_dict[num].word for num in speaker_known_vocab_num]
-        speaker_near_synonyms=[speaker.word_database.word_dict[num].todict_wo_object() for num in speaker.word_database.search_near_synonyms(corr_obj)]
-        speaker_short_memory=[]
-       
-        
-        
-        word=speaker.generate_new_word(
-            vocab=speaker_near_synonyms,
-            obj_features=corr_obj_features,
-            failed_records=speaker_short_memory,
-        )
-        speaker.word_database.add_word(
-                                text_embedding=corr_obj_embedding,
-                                word=word,
-                                obj=corr_obj,
-                                **corr_obj_features,
-                            )
-        listener.word_database.add_word(
-                                text_embedding=corr_obj_embedding,
-                                word=word,
-                                obj=corr_obj,
-                                **corr_obj_features,
-                            ) 
-        word_list.append(word)
-        return {
-            "speaker_id":speaker_id,
-            "listener_id":listener_id,
-            "word_list":word_list,
-            "corr_obj":corr_obj,
-            "speaker_near_synonyms":[word['word'] for word in speaker_near_synonyms],
-            "speaker_known_vocab":speaker_known_vocab,
-        }
-    def run(self, rounds):
-        save_flag=0
-        for _ in range(rounds):
-            save_flag+=1
-            results=[]
-            self.round+=1
-            player_ids=[str(i) for i in range(self.player_num)]
-            random.shuffle(player_ids)
-            pairs=[]
-            for i in range(0,self.player_num,2):
-                pairs.append((player_ids[i],player_ids[i+1]))
-            print(pairs)
-            for pair in pairs:
-                result=self.output(
-                    speaker_id=pair[0],
-                    listener_id=pair[1],
-                )
-                results.append(result)
-            if save_flag%self.save_interval==0:
-                self.save(results,True)
-            else:
-                self.save(results,False)
+
         
         
         
