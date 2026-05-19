@@ -95,7 +95,7 @@ class Referential_Game:
                 json.dump(asdict(config),f,indent=4)
         else:
             with open(f"./sim_storage/{self.name}/game_config.json","r") as f:
-                old_config=json.load(f)
+                old_config=gameconfig(**json.load(f))
             if old_config!=asdict(config):
                 raise ValueError("The game configuration is inconsistent with the historical configuration.")
         del config

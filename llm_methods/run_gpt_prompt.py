@@ -292,7 +292,7 @@ def run_gpt_prompt_listener_retrieval(letters_count,
                               player_id,
                               model,
                               verbose=True):
-    prompt_template="prompt/listner_retrieval.txt"
+    prompt_template="prompt/listener_retrieval.txt"
     def create_prompt(letters_count,
                       max_words,
                       letters_list,

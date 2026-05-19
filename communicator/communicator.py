@@ -2,6 +2,25 @@ from communicator.WordDatabase import WordDatabase
 from llm_methods.gpt_structure import text_embedding_request
 from llm_methods.run_gpt_prompt import *
 import random
+from typing import Protocol,List
+
+class communicator(Protocol):
+    id:int|str
+    max_length:int
+    model:str
+    def save(self,path):
+        ...
+    def load(self,path):
+        ...
+    def generate_new_word(
+        self,
+        vocab,
+        obj_features,
+        failed_records,
+    ):
+        ...
+    def listener_select(self,word,sf_dict:dict):
+        ...
 
 class communicator:
     def __init__(self,letter_list,id,max_length,model):

@@ -6,6 +6,8 @@ import os
 import warnings
 import random
 import time
+from dataclasses import dataclass,asdict
+from typing import List, Dict, Any
 def split_cv_blocks(word):
     """Split words into consonant + vowel chunks"""
     blocks=word.split("-")
@@ -21,38 +23,22 @@ def Jaccard_similarity(blocks_1, blocks_2, n):
     union = len(set1.union(set2))
     return intersection / union if union != 0 else 0.0
 
-
+@dataclass
 class Word:
-    def __init__(self,
-                 obj:str, 
-                 word: str,
-                 speak_fail_count=0,
-                 listen_fail_count=0,
-                 encyclopaedic=[],
-                 function=[],
-                 smell=[],
-                 sound=[],
-                 tactile=[],
-                 taste=[],
-                 taxonomic=[],
-                 visual_colour=[],
-                 visual_form_and_surface=[],
-                 visual_motion=[]):
-        
-        self.obj = obj
-        self.word = word
-        self.encyclopaedic = encyclopaedic
-        self.function = function
-        self.smell = smell
-        self.sound = sound
-        self.tactile = tactile
-        self.taste = taste
-        self.taxonomic = taxonomic
-        self.visual_colour = visual_colour
-        self.visual_form_and_surface = visual_form_and_surface
-        self.visual_motion = visual_motion
-        self.speak_fail_count=speak_fail_count
-        self.listen_fail_count=listen_fail_count
+    obj:str
+    word:str
+    encyclopaedic :List[str]
+    function :List[str]
+    smell :List[str]
+    sound :List[str]
+    tactile :List[str]
+    taste :List[str]
+    taxonomic :List[str]
+    visual_colour :List[str]
+    visual_form_and_surface :List[str]
+    visual_motion :List[str]
+    speak_fail_count:int=0
+    listen_fail_count:int=0
     def todict(self):
         return {
             "obj": self.obj,
