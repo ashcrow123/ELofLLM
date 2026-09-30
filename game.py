@@ -394,19 +394,3 @@ class Referential_Game:
             player_path=f"./sim_storage/{self.name}/round_{round}/Communicator_Worddatabase/Player_{str(key)}"
             self.players[key].load(player_path)
         print(f"round_{self.round} has loaded.")
-        
-        
-
-                                      
-
-        
-        
-        
-    
-    
-
-    
-    
-    
-    
-       

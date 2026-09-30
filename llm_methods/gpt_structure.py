@@ -60,13 +60,13 @@ def LLM_request(prompt, gpt_parameter):
         else:
             msg = [{"role": "user", "content": prompt}]
         completion = client.chat.completions.create(
-            model=gpt_parameter["model"],
+            model=gpt_parameter.model,
             messages=msg,
-            max_tokens=gpt_parameter["max_tokens"],
-            top_p=gpt_parameter["top_p"],
-            frequency_penalty=gpt_parameter["frequency_penalty"],
-            presence_penalty=gpt_parameter["presence_penalty"],
-            temperature=gpt_parameter["temperature"],
+            max_tokens=gpt_parameter.max_tokens,
+            top_p=gpt_parameter.top_p,
+            frequency_penalty=gpt_parameter.frequency_penalty,
+            presence_penalty=gpt_parameter.presence_penalty,
+            temperature=gpt_parameter.temperature,
         )
         return completion.choices[0].message.content
     except Exception as e:
@@ -75,17 +75,6 @@ def LLM_request(prompt, gpt_parameter):
 
 
 async def LLM_request_async(prompt, gpt_parameter):
-    """
-    Given a prompt and a dictionary of GPT parameters, make a request to OpenAI
-    server and returns the response.
-    ARGS:
-      prompt: a str prompt
-      gpt_parameter: a python dictionary with the keys indicating the names of
-                     the parameter and the values indicating the parameter
-                     values.
-    RETURNS:
-      a str of GPT-4o-mini's response.
-    """
     temp_sleep()
     try:
         if type(prompt) is dict:
@@ -96,13 +85,13 @@ async def LLM_request_async(prompt, gpt_parameter):
         else:
             msg = [{"role": "user", "content": prompt}]
         completion = await async_client.chat.completions.create(
-            model=gpt_parameter["model"],
+            model=gpt_parameter.model,
             messages=msg,
-            max_tokens=gpt_parameter["max_tokens"],
-            top_p=gpt_parameter["top_p"],
-            frequency_penalty=gpt_parameter["frequency_penalty"],
-            presence_penalty=gpt_parameter["presence_penalty"],
-            temperature=gpt_parameter["temperature"],
+            max_tokens=gpt_parameter.max_tokens,
+            top_p=gpt_parameter.top_p,
+            frequency_penalty=gpt_parameter.frequency_penalty,
+            presence_penalty=gpt_parameter.presence_penalty,
+            temperature=gpt_parameter.temperature,
         )
         return completion.choices[0].message.content
     except Exception as e:
@@ -144,7 +133,7 @@ def _run_retry_loop(result, gpt_parameter, repeat, response_model, verbose):
     prompt = result.pop("prompt")
     prompt_template = result.pop("prompt_template", None)
     if "model" in result:
-        gpt_parameter = {**gpt_parameter, "model": result.pop("model")}
+        gpt_parameter.model = result.pop("model")
     context = result
 
     curr_gpt_response = None
@@ -179,7 +168,7 @@ async def _run_retry_loop_async(result, gpt_parameter, repeat, response_model, v
     prompt = result.pop("prompt")
     prompt_template = result.pop("prompt_template", None)
     if "model" in result:
-        gpt_parameter = {**gpt_parameter, "model": result.pop("model")}
+        gpt_parameter.model = result.pop("model")
     context = result
 
     curr_gpt_response = None
@@ -213,25 +202,12 @@ async def _run_retry_loop_async(result, gpt_parameter, repeat, response_model, v
 def safe_generate_response(
     response_model: type[BaseModel],
     repeat: int = 5,
-    gpt_param: GPTPromptConfig | None = None,
 ):
-    if gpt_param is None:
-        gpt_param = GPTPromptConfig()
-
-    gpt_parameter = {
-        "model": gpt_param.model,
-        "max_tokens": gpt_param.max_tokens,
-        "top_p": gpt_param.top_p,
-        "frequency_penalty": gpt_param.frequency_penalty,
-        "presence_penalty": gpt_param.presence_penalty,
-        "temperature": gpt_param.temperature,
-    }
-
     def decorator(func):
         if inspect.iscoroutinefunction(func):
             @wraps(func)
             async def async_wrapper(*args, **kwargs):
-                result = await func(*args, **kwargs)
+                result, gpt_parameter = await func(*args, **kwargs)
                 return await _run_retry_loop_async(
                     result, gpt_parameter, repeat, response_model,
                     kwargs.get("verbose", True)
@@ -240,7 +216,7 @@ def safe_generate_response(
         else:
             @wraps(func)
             def wrapper(*args, **kwargs):
-                result = func(*args, **kwargs)
+                result,gpt_parameter = func(*args, **kwargs)
                 return _run_retry_loop(
                     result, gpt_parameter, repeat, response_model,
                     kwargs.get("verbose", True)

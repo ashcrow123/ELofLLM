@@ -2,7 +2,6 @@ import pandas as pd
 import os
 import numpy as np
 from llm_methods.gpt_structure import text_embedding_request
-from llm_methods.run_gpt_prompt import run_gpt_prompt_select_feature
 import json
 import random
 def find_most_similar_word(target_word, candidate_words,k=1):
@@ -92,14 +91,6 @@ class BRM_loader:
     
     def generate_features(self,word):
         features=dict()
-        text_embedding=text_embedding_request(word)
-        feature_select=run_gpt_prompt_select_feature(word).data
-        for tp,embeddings in self.text_embedding.items():
-            if tp in feature_select:
-                top_k_id,_=find_most_similar_word(text_embedding, embeddings,k=1)
-                features[tp]=self.df_list[tp][top_k_id[0]]
-            else:
-                features[tp]=None
         return features
 def load_object_feature_pairs(seed=None,count=None):
     pairs=dict()

@@ -13,8 +13,8 @@ class speaker_retrieval_response(BaseModel):
     max_length: int
     target_object: str
     object_num: int
-    analysis:Optional[str]=None
-    num_list: Optional[List[int]]=None
+    analysis:str
+    num_list: List[int]
 
     @model_validator(mode="after")
     def _check(self) -> Self:
@@ -149,25 +149,4 @@ class listener_select_response(BaseModel):
         )
 
 
-class select_feature_response(BaseModel):
-    data: List[str]
 
-    @model_validator(mode="after")
-    def _check(self) -> Self:
-        all_categories = [
-            'encyclopaedic',
-            'function',
-            'smell',
-            'sound',
-            'tactile',
-            'taste',
-            'taxonomic',
-            'visual_colour',
-            'visual_form_and_surface',
-            'visual_motion',
-        ]
-        if set(self.data).issubset(all_categories):
-            return self
-        raise ValueError(
-            f"Categories {set(self.data) - set(all_categories)} not in allowed categories"
-        )
