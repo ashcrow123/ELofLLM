@@ -22,3 +22,5 @@ exp_result.txt
 random_baseline/
 .vscode/
 .env
+baseline_runs/
+baseline/**/__pycache__/
